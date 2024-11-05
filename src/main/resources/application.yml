@@ -1,0 +1,52 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/email_checker_bot_db
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+
+email:
+  providers:
+    yandex:
+      host: imap.yandex.com
+      port: 993
+      ssl: true
+      auth: XOAUTH2
+    gmail:
+      host: imap.gmail.com
+      port: 993
+      ssl: true
+      auth: XOAUTH2
+    mailru:
+      host: imap.mail.ru
+      port: 993
+      ssl: true
+      auth: XOAUTH2
+  check:
+    delay: PT1M
+
+fixed:
+  thread:
+    pool:
+      size: 10
+
+yandex:
+  auth-url: https://oauth.yandex.ru/authorize?response_type=token&client_id=
+  client-id: e0261684b7fb476c8049cfe487c9c89b
+  settings-url: https://mail.yandex.ru/#setup/client
+
+rest:
+  yandex:
+    url: https://login.yandex.ru
+    read-timeout: 120s
+    connect-timeout: 120s
+
+telegram:
+  bot:
+    token: 8011278387:AAHWhDVCfXxFtWIdx3SK_rUKIkQer4zmKmI
+    username: Slava
