@@ -21,6 +21,22 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	implementation("org.projectlombok:lombok")
+	annotationProcessor("org.projectlombok:lombok")
+
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.liquibase:liquibase-core")
+	runtimeOnly("org.postgresql:postgresql")
+
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+
+	implementation("org.springframework.boot:spring-boot-starter-web")
+
+	implementation("com.sun.mail:javax.mail:1.6.2")
+	implementation("javax.activation:activation:1.1.1")
+
+	implementation("org.telegram:telegrambots:6.9.7.1")
 }
 
 tasks.withType<Test> {
