@@ -2,11 +2,10 @@ package ru.tbank.emailcheckerbot.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.tbank.emailcheckerbot.entity.UserEmailEntity;
+import ru.tbank.emailcheckerbot.message.EmailMessage;
+import ru.tbank.emailcheckerbot.repository.UserEmailRepository;
 
-import javax.mail.Folder;
-import javax.mail.Session;
-import javax.mail.Store;
-import javax.mail.UIDFolder;
 import java.util.Properties;
 
 @Service
@@ -14,35 +13,26 @@ import java.util.Properties;
 public class EmailUIDService {
 
     private final EmailSessionPropertiesService emailSessionPropertiesService;
+    private final EmailSessionService emailSessionService;
+
+    private final UserEmailRepository userEmailRepository;
 
     public long getLastMessageUID(String email, String emailProvider, String token) {
-        long lastUIDMessage = 0;
+        Properties properties = emailSessionPropertiesService.getSessionProperties(emailProvider);
+        return emailSessionService.getLastMessageUID(properties, email, token);
+    }
 
-        try {
-            Properties properties = emailSessionPropertiesService.getSessionProperties(emailProvider);
+    public String getMessageByUID(long userEmailId, long messageUID) {
+        UserEmailEntity userEmail = userEmailRepository.getReferenceById(userEmailId);
+        Properties properties = emailSessionPropertiesService.getSessionProperties(userEmail.getEmailProvider());
 
-            Session session = Session.getInstance(properties);
-            Store store = session.getStore("imap");
-            store.connect(
-                    properties.getProperty("mail.imap.host"),
-                    email,
-                    token
-            );
+        EmailMessage message = emailSessionService.getMessageByUID(
+                properties,
+                userEmail.getEmail(),
+                userEmail.getToken(),
+                messageUID
+        );
 
-            Folder inbox = store.getFolder("INBOX");
-            inbox.open(Folder.READ_ONLY);
-
-            UIDFolder uidFolder = (UIDFolder) inbox;
-            uidFolder.getUIDNext();
-            lastUIDMessage = uidFolder.getUIDNext() - 1;
-
-            inbox.close(false);
-            store.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return lastUIDMessage;
+        return message.getContent();
     }
 }
