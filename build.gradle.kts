@@ -37,6 +37,9 @@ dependencies {
 	implementation("javax.activation:activation:1.1.1")
 
 	implementation("org.telegram:telegrambots:6.9.7.1")
+
+	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+	implementation("org.jsoup:jsoup:1.18.1")
 }
 
 tasks.withType<Test> {
