@@ -85,8 +85,7 @@ public class EmailSessionService {
             folder.open(Folder.READ_ONLY);
 
             UIDFolder uidFolder = (UIDFolder) folder;
-//            Message[] newMessages = uidFolder.getMessagesByUID(lastMessageUID + 1, UIDFolder.MAXUID);
-            Message[] newMessages = uidFolder.getMessagesByUID(1, UIDFolder.MAXUID);
+            Message[] newMessages = uidFolder.getMessagesByUID(lastMessageUID + 1, UIDFolder.MAXUID);
 
             emailMessages = new EmailMessage[newMessages.length];
             for (int i = 0; i < newMessages.length; i++) {
