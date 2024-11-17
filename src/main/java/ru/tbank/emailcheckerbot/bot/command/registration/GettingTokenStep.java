@@ -31,7 +31,7 @@ public class GettingTokenStep implements EmailRegistrationStep {
         Long userId = message.getFrom().getId();
 
         userStateService.setEmail(userId, yandexService.getEmail(token));
-        userStateService.setToken(userId, token);
+        userStateService.setAccessToken(userId, token);
         userStateService.setStep(message.getFrom().getId(), RegistrationStep.WAITING_FOR_PERMISSION_CONFIRMATION);
 
         String responseText = "Теперь необходимо перейти по ссылке ниже и" +

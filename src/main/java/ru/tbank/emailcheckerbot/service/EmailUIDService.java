@@ -29,7 +29,7 @@ public class EmailUIDService {
         EmailMessage message = emailSessionService.getMessageByUID(
                 properties,
                 userEmail.getEmail(),
-                userEmail.getToken(),
+                userEmail.getAccessToken(),
                 messageUID
         );
 

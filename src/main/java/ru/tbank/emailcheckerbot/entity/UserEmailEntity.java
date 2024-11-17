@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
+
 @Getter
 @Setter
 @Entity
@@ -28,7 +30,14 @@ public class UserEmailEntity {
     private String email;
 
     @NotNull
-    private String token;
+    @Column(name = "access_token")
+    private String accessToken;
+
+    @Column(name = "refresh_token")
+    private String refreshToken;
+
+    @Column(name = "end_access_token_life")
+    private Instant endAccessTokenLife;
 
     @NotNull
     @Column(name = "last_message_uid")

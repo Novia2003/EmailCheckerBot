@@ -9,6 +9,7 @@ import ru.tbank.emailcheckerbot.entity.UserEntity;
 import ru.tbank.emailcheckerbot.repository.UserEmailRepository;
 import ru.tbank.emailcheckerbot.repository.UserRepository;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,12 +54,12 @@ public class UserStateService {
         map.get(userId).setEmail(email);
     }
 
-    public String getToken(Long userId) {
-        return map.get(userId).getToken();
+    public String getAccessToken(Long userId) {
+        return map.get(userId).getAccessToken();
     }
 
-    public void setToken(Long userId, String token) {
-        map.get(userId).setToken(token);
+    public void setAccessToken(Long userId, String token) {
+        map.get(userId).setAccessToken(token);
     }
 
     public void setLastMessageUID(Long userId, Long lastMessageUID) {
@@ -89,7 +90,9 @@ public class UserStateService {
         UserEmailEntity userEmailEntity = new UserEmailEntity();
         userEmailEntity.setEmailProvider(entry.getEmailProvider());
         userEmailEntity.setEmail(entry.getEmail());
-        userEmailEntity.setToken(entry.getToken());
+        userEmailEntity.setAccessToken(entry.getAccessToken());
+        userEmailEntity.setRefreshToken(entry.getRefreshToken());
+        userEmailEntity.setEndAccessTokenLife(entry.getEndAccessTokenLife());
         userEmailEntity.setLastMessageUID(entry.getLastMessageUID());
         userEmailEntity.setUser(user);
         userEmailRepository.save(userEmailEntity);
@@ -102,7 +105,9 @@ public class UserStateService {
         private long chatId;
         private String emailProvider;
         private String email;
-        private String token;
+        private String accessToken;
+        private String refreshToken;
+        private Instant endAccessTokenLife;
         private Long lastMessageUID;
         private RegistrationStep registrationStep;
     }

@@ -20,7 +20,7 @@ public class PermissionConfirmationStep implements EmailRegistrationStep {
         Long lastMessageUID = emailUIDService.getLastMessageUID(
                 userStateService.getEmail(userId),
                 userStateService.getEmailProvider(userId),
-                userStateService.getToken(userId)
+                userStateService.getAccessToken(userId)
         );
 
         userStateService.setLastMessageUID(userId, lastMessageUID);
