@@ -40,9 +40,20 @@ yandex:
   client-id: e0261684b7fb476c8049cfe487c9c89b
   settings-url: https://mail.yandex.ru/#setup/client
 
+mailru:
+  url: https://oauth.mail.ru
+  client-id: c2e5ae1d247a4e1b827db598ff988021
+  client-secret: a3d25162637f42028f7d83f1c10e1f2c
+  redirect-uri: http://127.0.0.1:8080/api/v1/oauth/receiver
+
 rest:
   yandex:
     url: https://login.yandex.ru
+    read-timeout: 120s
+    connect-timeout: 120s
+
+  mailru:
+    url: https://oauth.mail.ru
     read-timeout: 120s
     connect-timeout: 120s
 

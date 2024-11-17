@@ -42,7 +42,7 @@ public class EmailCheckService {
             EmailMessage[] newMessages = emailSessionService.getNewMessages(
                     properties,
                     userEmailEntity.getEmail(),
-                    userEmailEntity.getToken(),
+                    userEmailEntity.getAccessToken(),
                     userEmailEntity.getLastMessageUID()
             );
 
