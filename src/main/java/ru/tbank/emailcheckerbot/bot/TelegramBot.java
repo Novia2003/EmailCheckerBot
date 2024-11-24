@@ -8,17 +8,11 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.tbank.emailcheckerbot.bot.command.BotCommand;
-import ru.tbank.emailcheckerbot.bot.command.Command;
 import ru.tbank.emailcheckerbot.bot.command.CommandFactory;
-import ru.tbank.emailcheckerbot.bot.command.registration.RegistrationStep;
-import ru.tbank.emailcheckerbot.service.UserStateService;
 
 @Slf4j
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
-
-    @Autowired
-    private UserStateService userStateService;
 
     @Autowired
     private CommandFactory commandFactory;
@@ -41,13 +35,10 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void handleMessage(Update update) {
         String messageText = update.getMessage().getText();
-        System.out.println(update.getMessage().getFrom().getId());
 
         BotCommand command = commandFactory.getCommand(messageText);
 
-        if (command == null) {
-            handleUserInput(update);
-        } else {
+        if (command != null) {
             executeMessage(command.execute(update));
         }
     }
@@ -58,17 +49,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         BotCommand command = commandFactory.getCommand(commandName);
 
         executeMessage(command.execute(update));
-//        deleteMessage(callbackQuery.getMessage().getChatId(), callbackQuery.getMessage().getMessageId());
-    }
-
-    private void handleUserInput(Update update) {
-        long userId = update.getMessage().getFrom().getId();
-
-        if (userStateService.getStep(userId) == RegistrationStep.WAITING_FOR_TOKEN) {
-            executeMessage(commandFactory.getCommand(Command.ADD_EMAIL.getTitle()).execute(update));
-        } else {
-            System.out.println("Кто Вы и что Вам надо?");
-        }
     }
 
     public void executeMessage(SendMessage message) {

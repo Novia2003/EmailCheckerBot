@@ -7,7 +7,8 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.tbank.emailcheckerbot.service.UserStateService;
+import ru.tbank.emailcheckerbot.entity.MailProvider;
+import ru.tbank.emailcheckerbot.service.UserEmailRedisService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,15 +19,14 @@ import static ru.tbank.emailcheckerbot.bot.util.TelegramUtils.createInlineKeyboa
 @RequiredArgsConstructor
 public class InitialEmailRegistrationStep implements EmailRegistrationStep {
 
-    private final UserStateService userStateService;
+    private final UserEmailRedisService userEmailRedisService;
 
     @Override
     public SendMessage execute(Update update) {
         Message message = update.getMessage();
         Long userId = update.getMessage().getFrom().getId();
 
-        userStateService.createUserEmailEntry(userId, message.getChatId());
-        userStateService.setStep(userId, RegistrationStep.CHOOSING_PROVIDER);
+        userEmailRedisService.createUserEmailRedisEntity(userId, message.getChatId());
 
         SendMessage response = new SendMessage();
         response.setChatId(message.getChatId());
@@ -39,13 +39,19 @@ public class InitialEmailRegistrationStep implements EmailRegistrationStep {
             buttons.add(
                     createInlineKeyboardButton(
                             provider.getTitle(),
-                            "/add_email provider " + provider,
-                            null)
+                            "/add_email " + RegistrationStep.CHOOSING_PROVIDER + " " + provider,
+                            null
+                    )
             );
         }
         markup.setKeyboard(List.of(buttons));
         response.setReplyMarkup(markup);
 
         return response;
+    }
+
+    @Override
+    public RegistrationStep getRegistrationStep() {
+        return RegistrationStep.INITIAL;
     }
 }
