@@ -12,7 +12,8 @@ import java.time.Duration;
 @Configuration
 @ConfigurationProperties("rest.yandex")
 public class YandexRestProperties {
-    private String url;
+    private String userInfoUrl;
+    private String oauthUrl;
     private Duration readTimeout;
     private Duration connectTimeout;
 }

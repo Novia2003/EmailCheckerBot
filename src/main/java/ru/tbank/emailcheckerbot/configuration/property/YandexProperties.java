@@ -12,5 +12,6 @@ import org.springframework.context.annotation.Configuration;
 public class YandexProperties {
     private String authUrl;
     private String clientId;
+    private String clientSecret;
     private String settingsUrl;
 }

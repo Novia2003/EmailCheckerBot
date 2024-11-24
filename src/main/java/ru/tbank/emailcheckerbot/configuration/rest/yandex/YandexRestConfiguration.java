@@ -12,12 +12,24 @@ import ru.tbank.emailcheckerbot.configuration.property.YandexRestProperties;
 public class YandexRestConfiguration {
 
     @Bean
-    public RestTemplate yandexRestTemplate(
+    public RestTemplate yandexUserInfoRestTemplate(
             RestTemplateBuilder restTemplateBuilder,
             YandexRestProperties properties
     ) {
         return restTemplateBuilder
-                .rootUri(properties.getUrl())
+                .rootUri(properties.getUserInfoUrl())
+                .setConnectTimeout(properties.getConnectTimeout())
+                .setReadTimeout(properties.getReadTimeout())
+                .build();
+    }
+
+    @Bean
+    public RestTemplate yandexOauthRestTemplate(
+            RestTemplateBuilder restTemplateBuilder,
+            YandexRestProperties properties
+    ) {
+        return restTemplateBuilder
+                .rootUri(properties.getOauthUrl())
                 .setConnectTimeout(properties.getConnectTimeout())
                 .setReadTimeout(properties.getReadTimeout())
                 .build();
