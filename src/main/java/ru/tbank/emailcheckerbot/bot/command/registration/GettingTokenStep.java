@@ -65,7 +65,7 @@ public class GettingTokenStep implements EmailRegistrationStep {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<InlineKeyboardButton> buttons = List.of(
                 createInlineKeyboardButton(
-                        "Перейти к настройкам",
+                        "Разрешить доступ к почтовому ящику",
                         null,
                         settingsUrl
                 ),
