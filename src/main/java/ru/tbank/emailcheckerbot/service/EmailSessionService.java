@@ -1,8 +1,10 @@
 package ru.tbank.emailcheckerbot.service;
 
 import org.springframework.stereotype.Service;
+import ru.tbank.emailcheckerbot.exeption.EmailAccessException;
 import ru.tbank.emailcheckerbot.message.EmailMessage;
 
+import javax.mail.AuthenticationFailedException;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -46,6 +48,8 @@ public class EmailSessionService {
 
             folder.close(false);
             folder.getStore().close();
+        } catch (AuthenticationFailedException e) {
+            throw new EmailAccessException("Нет доступа к почтовому ящику с помощью почтовых клиентов.");
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
