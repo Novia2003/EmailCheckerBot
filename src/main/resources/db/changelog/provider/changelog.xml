@@ -4,7 +4,11 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
-    <include file="init/changelog.xml" relativeToChangelogFile="true"/>
-    <include file="security/changelog.xml" relativeToChangelogFile="true"/>
-    <include file="provider/changelog.xml" relativeToChangelogFile="true"/>
+    <changeSet id="provider" author="Slava">
+        <sqlFile
+                path="sql/change_title_and_type_mail_provider_in_user_emails_table.sql"
+                dbms="postgresql"
+                relativeToChangelogFile="true"
+        />
+    </changeSet>
 </databaseChangeLog>
