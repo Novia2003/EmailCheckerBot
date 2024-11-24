@@ -1,11 +1,10 @@
-package ru.tbank.emailcheckerbot.bot.command.registration;
+package ru.tbank.emailcheckerbot.entity;
 
 import lombok.Getter;
 
 @Getter
 public enum MailProvider {
     YANDEX("Yandex", "yandex"),
-    GOOGLE("Google", "gmail"),
     MAILRu("Mail.ru", "mailru");
 
     private final String title;
