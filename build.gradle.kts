@@ -40,6 +40,9 @@ dependencies {
 
 	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 	implementation("org.jsoup:jsoup:1.18.1")
+
+	implementation("org.springframework.data:spring-data-redis:3.4.0")
+	implementation("redis.clients:jedis:5.2.0")
 }
 
 tasks.withType<Test> {

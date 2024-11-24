@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.tbank.emailcheckerbot.bot.TelegramBot;
 import ru.tbank.emailcheckerbot.configuration.property.MessagesProperties;
-import ru.tbank.emailcheckerbot.entity.UserEmailEntity;
+import ru.tbank.emailcheckerbot.entity.postgre.UserEmailPostgreEntity;
 import ru.tbank.emailcheckerbot.message.EmailMessage;
 
 import javax.mail.MessagingException;
@@ -28,16 +28,16 @@ public class NotificationService {
 
     private final TelegramBot telegramBot;
 
-    public void notifyUser(EmailMessage[] newMessages, UserEmailEntity userEmailEntity) {
+    public void notifyUser(EmailMessage[] newMessages, UserEmailPostgreEntity userEmailPostgreEntity) {
         Arrays.stream(newMessages).forEach(message -> {
             try {
                 String notificationText = formatNotificationMessage(
                         message,
-                        userEmailEntity.getEmail()
+                        userEmailPostgreEntity.getEmail()
                 );
 
-                String messageLink = getMessageLink(message.getUid(), userEmailEntity.getId());
-                sendNotification(userEmailEntity.getUser().getChatId(), notificationText, messageLink);
+                String messageLink = getMessageLink(message.getUid(), userEmailPostgreEntity.getId());
+                sendNotification(userEmailPostgreEntity.getUser().getChatId(), notificationText, messageLink);
             } catch (MessagingException e) {
                 log.error("Ошибка при формировании уведомления: {}", e.getMessage());
             }

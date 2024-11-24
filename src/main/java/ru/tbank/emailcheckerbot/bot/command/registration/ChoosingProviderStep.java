@@ -6,7 +6,10 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.tbank.emailcheckerbot.service.UserStateService;
+import ru.tbank.emailcheckerbot.bot.command.Command;
+import ru.tbank.emailcheckerbot.entity.MailProvider;
+import ru.tbank.emailcheckerbot.service.MailRuService;
+import ru.tbank.emailcheckerbot.service.UserEmailRedisService;
 import ru.tbank.emailcheckerbot.service.YandexService;
 
 import java.util.List;
@@ -18,47 +21,63 @@ import static ru.tbank.emailcheckerbot.bot.util.TelegramUtils.createInlineKeyboa
 public class ChoosingProviderStep implements EmailRegistrationStep {
 
     private final YandexService yandexService;
-    private final UserStateService userStateService;
+    private final MailRuService mailRuService;
+    private final UserEmailRedisService userEmailRedisService;
 
 
     @Override
     public SendMessage execute(Update update) {
+        Long userId = update.getCallbackQuery().getFrom().getId();
+        Long chatId = update.getCallbackQuery().getMessage().getChatId();
+
+        if (userEmailRedisService.isUserEmailRecordNotExists(userId)) {
+            return getUserInactivityMessage(chatId);
+        }
+
         String providerName = update.getCallbackQuery().getData().split(" ")[2];
         MailProvider provider = MailProvider.valueOf(providerName);
 
-        SendMessage response;
-
         switch (provider) {
 
-            case YANDEX -> response = handleYandexProviderChoice(update);
+            case YANDEX -> {
+                return handleProviderChoice(
+                        chatId,
+                        MailProvider.YANDEX.getTitle(),
+                        yandexService.getAuthUrl(userId)
+                );
+            }
 
-            case GOOGLE -> response = handleGoogleProviderChoice(update);
-
-            case MAILRu -> response = handleMailRuProviderChoice(update);
+            case MAILRu -> {
+                return handleProviderChoice(
+                        chatId,
+                        MailProvider.MAILRu.getTitle(),
+                        mailRuService.getAuthUrl(userId)
+                );
+            }
 
             default -> throw new IllegalStateException("Unexpected value: " + provider);
         }
-
-        return response;
     }
 
-    private SendMessage handleYandexProviderChoice(Update update) {
-        Long userId = update.getCallbackQuery().getFrom().getId();
-        userStateService.setEmailProvider(userId, MailProvider.YANDEX.getConfigurationName());
-        userStateService.setStep(userId, RegistrationStep.WAITING_FOR_TOKEN);
-        String authUrl = yandexService.getAuthUrl();
-        String responseText = "Для добавления Yandex почты, пожалуйста, авторизуйтесь по ссылке ниже и отправьте полученный токен в этот чат.";
-
+    private SendMessage handleProviderChoice(Long chatId, String providerTitle, String authUrl) {
         SendMessage response = new SendMessage();
-        response.setChatId(update.getCallbackQuery().getMessage().getChatId());
+        response.setChatId(chatId);
+        String responseText = "Для добавления " + providerTitle +
+                " почты, пожалуйста, авторизуйтесь по ссылке ниже";
         response.setText(responseText);
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<InlineKeyboardButton> buttons = List.of(
                 createInlineKeyboardButton(
                         "Авторизоваться",
-                        "/add_email authorization_done",
-                        authUrl)
+                        null,
+                        authUrl
+                ),
+                createInlineKeyboardButton(
+                        "Выполнено ✅",
+                        "/add_email " + RegistrationStep.GETTING_TOKEN,
+                        null
+                )
         );
         markup.setKeyboard(List.of(buttons));
         response.setReplyMarkup(markup);
@@ -66,19 +85,18 @@ public class ChoosingProviderStep implements EmailRegistrationStep {
         return response;
     }
 
-    private SendMessage handleGoogleProviderChoice(Update update) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(update.getCallbackQuery().getMessage().getChatId());
-        sendMessage.setText("Извините, поддержка этого провайдера пока не реализована.");
-
-        return sendMessage;
+    @Override
+    public RegistrationStep getRegistrationStep() {
+        return RegistrationStep.CHOOSING_PROVIDER;
     }
 
-    private SendMessage handleMailRuProviderChoice(Update update) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(update.getCallbackQuery().getMessage().getChatId());
-        sendMessage.setText("Извините, поддержка этого провайдера пока не реализована.");
+    private SendMessage getUserInactivityMessage(Long chatId) {
+        SendMessage response = new SendMessage();
+        response.setChatId(chatId);
+        String responseText = "Вы долго бездействовали, и запись о Вас была удалена.\n" +
+                "Пожалуйста, начните процесс добавления почты с начала " + Command.ADD_EMAIL.getTitle();
+        response.setText(responseText);
 
-        return sendMessage;
+        return response;
     }
 }

@@ -1,4 +1,4 @@
-package ru.tbank.emailcheckerbot.entity;
+package ru.tbank.emailcheckerbot.entity.postgre;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +15,7 @@ import java.util.List;
 @Table(name = "users")
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserEntity {
+public class UserPostgreEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,5 +30,5 @@ public class UserEntity {
     private Long chatId;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserEmailEntity> emails;
+    private List<UserEmailPostgreEntity> emails;
 }
