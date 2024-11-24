@@ -14,4 +14,5 @@ public class MailRuProperties {
     private String clientId;
     private String clientSecret;
     private String redirectUri;
+    private String settingsUrl;
 }
