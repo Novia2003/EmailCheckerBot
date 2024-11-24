@@ -2,10 +2,11 @@ package ru.tbank.emailcheckerbot.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.tbank.emailcheckerbot.entity.UserEmailEntity;
+import ru.tbank.emailcheckerbot.entity.MailProvider;
+import ru.tbank.emailcheckerbot.entity.postgre.UserEmailPostgreEntity;
 import ru.tbank.emailcheckerbot.message.EmailMessage;
-import ru.tbank.emailcheckerbot.repository.UserEmailRepository;
 
+import java.time.Instant;
 import java.util.Properties;
 
 @Service
@@ -14,17 +15,24 @@ public class EmailUIDService {
 
     private final EmailSessionPropertiesService emailSessionPropertiesService;
     private final EmailSessionService emailSessionService;
+    private final UserEmailPostgreService userEmailPostgreService;
+    private final AuthenticationService authenticationService;
 
-    private final UserEmailRepository userEmailRepository;
+    public long getLastMessageUID(String email, MailProvider emailProvider, String token) {
+        Properties properties = emailSessionPropertiesService.getSessionProperties(emailProvider.getConfigurationName());
 
-    public long getLastMessageUID(String email, String emailProvider, String token) {
-        Properties properties = emailSessionPropertiesService.getSessionProperties(emailProvider);
         return emailSessionService.getLastMessageUID(properties, email, token);
     }
 
     public String getMessageByUID(long userEmailId, long messageUID) {
-        UserEmailEntity userEmail = userEmailRepository.getReferenceById(userEmailId);
-        Properties properties = emailSessionPropertiesService.getSessionProperties(userEmail.getEmailProvider());
+        UserEmailPostgreEntity userEmail = userEmailPostgreService.getUserEmail(userEmailId);
+        Properties properties = emailSessionPropertiesService.getSessionProperties(
+                userEmail.getMailProvider().getConfigurationName()
+        );
+
+        if (Instant.now().isAfter(userEmail.getEndAccessTokenLife())) {
+            authenticationService.refreshToken(userEmail.getId(), true);
+        }
 
         EmailMessage message = emailSessionService.getMessageByUID(
                 properties,
