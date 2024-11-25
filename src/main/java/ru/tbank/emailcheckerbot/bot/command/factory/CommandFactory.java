@@ -1,11 +1,13 @@
-package ru.tbank.emailcheckerbot.bot.command;
+package ru.tbank.emailcheckerbot.bot.command.factory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.tbank.emailcheckerbot.bot.command.BotCommand;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Component
 public class CommandFactory {
@@ -20,6 +22,12 @@ public class CommandFactory {
     }
 
     public BotCommand getCommand(String command) {
-        return commands.getOrDefault(command, null);
+        BotCommand botCommand = commands.get(command);
+
+        if (botCommand == null) {
+            throw new NoSuchElementException("No found action for command: " + command);
+        }
+
+        return botCommand;
     }
 }

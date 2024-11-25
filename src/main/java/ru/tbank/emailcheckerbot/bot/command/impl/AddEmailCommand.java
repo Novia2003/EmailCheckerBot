@@ -1,11 +1,14 @@
-package ru.tbank.emailcheckerbot.bot.command;
+package ru.tbank.emailcheckerbot.bot.command.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.tbank.emailcheckerbot.bot.command.BotCommand;
+import ru.tbank.emailcheckerbot.bot.command.Command;
 import ru.tbank.emailcheckerbot.bot.command.registration.RegistrationStep;
-import ru.tbank.emailcheckerbot.bot.command.registration.RegistrationStepFactory;
+import ru.tbank.emailcheckerbot.bot.command.registration.factory.RegistrationStepFactory;
+import ru.tbank.emailcheckerbot.exeption.InvalidCallbackQueryException;
 
 @Component
 @RequiredArgsConstructor
@@ -19,9 +22,14 @@ public class AddEmailCommand implements BotCommand {
             return registrationStepFactory.getEmailRegistrationStep(RegistrationStep.INITIAL).execute(update);
         }
 
-        RegistrationStep currentStep = RegistrationStep.valueOf(
-                update.getCallbackQuery().getData().split(" ")[1]
-        );
+        String[] callbackQueryData = update.getCallbackQuery().getData().split(" ");
+
+
+        if (callbackQueryData.length < 2) {
+            throw new InvalidCallbackQueryException("Incorrect number of words in the callbackQuery");
+        }
+
+        RegistrationStep currentStep = RegistrationStep.valueOf(callbackQueryData[1]);
 
         return registrationStepFactory.getEmailRegistrationStep(currentStep).execute(update);
     }

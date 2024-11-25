@@ -1,10 +1,12 @@
-package ru.tbank.emailcheckerbot.bot.command;
+package ru.tbank.emailcheckerbot.bot.command.impl;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.tbank.emailcheckerbot.bot.command.BotCommand;
+import ru.tbank.emailcheckerbot.bot.command.Command;
 
 import java.util.List;
 

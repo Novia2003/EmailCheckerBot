@@ -1,4 +1,4 @@
-package ru.tbank.emailcheckerbot.bot.command.registration;
+package ru.tbank.emailcheckerbot.bot.command.registration.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -6,22 +6,24 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.tbank.emailcheckerbot.bot.command.Command;
-import ru.tbank.emailcheckerbot.entity.MailProvider;
-import ru.tbank.emailcheckerbot.service.MailRuService;
-import ru.tbank.emailcheckerbot.service.UserEmailRedisService;
-import ru.tbank.emailcheckerbot.service.YandexService;
+import ru.tbank.emailcheckerbot.bot.command.registration.EmailRegistrationStep;
+import ru.tbank.emailcheckerbot.bot.command.registration.RegistrationStep;
+import ru.tbank.emailcheckerbot.dto.type.MailProvider;
+import ru.tbank.emailcheckerbot.exeption.InvalidCallbackQueryException;
+import ru.tbank.emailcheckerbot.service.user.UserEmailRedisService;
+import ru.tbank.emailcheckerbot.service.provider.factory.MailServiceFactory;
 
 import java.util.List;
 
 import static ru.tbank.emailcheckerbot.bot.util.TelegramUtils.createInlineKeyboardButton;
+import static ru.tbank.emailcheckerbot.bot.util.TelegramUtils.getUserInactivityMessage;
 
 @Component
 @RequiredArgsConstructor
 public class ChoosingProviderStep implements EmailRegistrationStep {
 
-    private final YandexService yandexService;
-    private final MailRuService mailRuService;
+    private final MailServiceFactory mailServiceFactory;
+
     private final UserEmailRedisService userEmailRedisService;
 
 
@@ -34,29 +36,20 @@ public class ChoosingProviderStep implements EmailRegistrationStep {
             return getUserInactivityMessage(chatId);
         }
 
-        String providerName = update.getCallbackQuery().getData().split(" ")[2];
+        String[] callbackQueryData = update.getCallbackQuery().getData().split(" ");
+
+        if (callbackQueryData.length < 3) {
+            throw new InvalidCallbackQueryException("Incorrect number of words in the callbackQuery");
+        }
+
+        String providerName = callbackQueryData[2];
         MailProvider provider = MailProvider.valueOf(providerName);
 
-        switch (provider) {
-
-            case YANDEX -> {
-                return handleProviderChoice(
-                        chatId,
-                        MailProvider.YANDEX.getTitle(),
-                        yandexService.getAuthUrl(userId)
-                );
-            }
-
-            case MAILRu -> {
-                return handleProviderChoice(
-                        chatId,
-                        MailProvider.MAILRu.getTitle(),
-                        mailRuService.getAuthUrl(userId)
-                );
-            }
-
-            default -> throw new IllegalStateException("Unexpected value: " + provider);
-        }
+        return handleProviderChoice(
+                chatId,
+                provider.getTitle(),
+                mailServiceFactory.getService(provider).getAuthUrl(userId)
+        );
     }
 
     private SendMessage handleProviderChoice(Long chatId, String providerTitle, String authUrl) {
@@ -88,15 +81,5 @@ public class ChoosingProviderStep implements EmailRegistrationStep {
     @Override
     public RegistrationStep getRegistrationStep() {
         return RegistrationStep.CHOOSING_PROVIDER;
-    }
-
-    private SendMessage getUserInactivityMessage(Long chatId) {
-        SendMessage response = new SendMessage();
-        response.setChatId(chatId);
-        String responseText = "Вы долго бездействовали, и запись о Вас была удалена.\n" +
-                "Пожалуйста, начните процесс добавления почты с начала " + Command.ADD_EMAIL.getTitle();
-        response.setText(responseText);
-
-        return response;
     }
 }

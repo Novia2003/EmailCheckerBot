@@ -1,16 +1,20 @@
-package ru.tbank.emailcheckerbot.bot.command.registration;
+package ru.tbank.emailcheckerbot.bot.command.registration.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.tbank.emailcheckerbot.bot.command.Command;
+import ru.tbank.emailcheckerbot.bot.command.registration.EmailRegistrationStep;
+import ru.tbank.emailcheckerbot.bot.command.registration.RegistrationStep;
+import ru.tbank.emailcheckerbot.entity.redis.UserEmailRedisEntity;
 import ru.tbank.emailcheckerbot.exeption.EmailAccessException;
-import ru.tbank.emailcheckerbot.service.AuthenticationService;
-import ru.tbank.emailcheckerbot.service.EmailUIDService;
-import ru.tbank.emailcheckerbot.service.UserEmailRedisService;
+import ru.tbank.emailcheckerbot.service.authentication.AuthenticationService;
+import ru.tbank.emailcheckerbot.service.email.EmailUIDService;
+import ru.tbank.emailcheckerbot.service.user.UserEmailRedisService;
 
 import java.time.Instant;
+
+import static ru.tbank.emailcheckerbot.bot.util.TelegramUtils.getUserInactivityMessage;
 
 @Component
 @RequiredArgsConstructor
@@ -36,10 +40,12 @@ public class PermissionConfirmationStep implements EmailRegistrationStep {
         long lastMessageUID;
 
         try {
+            UserEmailRedisEntity userEmailRedisEntity = userEmailRedisService.getUserEmailRedisEntity(userId);
+
             lastMessageUID = emailUIDService.getLastMessageUID(
-                    userEmailRedisService.getEmail(userId),
-                    userEmailRedisService.getMailProvider(userId),
-                    userEmailRedisService.getAccessToken(userId)
+                    userEmailRedisEntity.getEmail(),
+                    userEmailRedisEntity.getMailProvider(),
+                    userEmailRedisEntity.getAccessToken()
             );
         } catch (EmailAccessException e) {
             return getFailedPermissionConfirmationMessage(chatId, e.getMessage());
@@ -60,15 +66,6 @@ public class PermissionConfirmationStep implements EmailRegistrationStep {
         return RegistrationStep.PERMISSION_CONFIRMATION;
     }
 
-    private SendMessage getUserInactivityMessage(Long chatId) {
-        SendMessage response = new SendMessage();
-        response.setChatId(chatId);
-        String responseText = "Вы долго бездействовали, и запись о Вас была удалена.\n" +
-                "Пожалуйста, начните процесс добавления почты с начала " + Command.ADD_EMAIL.getTitle();
-        response.setText(responseText);
-
-        return response;
-    }
 
     private SendMessage getFailedPermissionConfirmationMessage(Long chatId, String exceptionMessage) {
         SendMessage response = new SendMessage();

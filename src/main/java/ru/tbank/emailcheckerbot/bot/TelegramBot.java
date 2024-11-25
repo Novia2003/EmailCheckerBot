@@ -8,7 +8,8 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.tbank.emailcheckerbot.bot.command.BotCommand;
-import ru.tbank.emailcheckerbot.bot.command.CommandFactory;
+import ru.tbank.emailcheckerbot.bot.command.factory.CommandFactory;
+import ru.tbank.emailcheckerbot.exeption.InvalidCallbackQueryException;
 
 @Slf4j
 @Component
@@ -44,8 +45,13 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void handleCallbackQuery(Update update) {
-        String data = update.getCallbackQuery().getData();
-        String commandName = data.split(" ")[0];
+        String[] callbackQueryData = update.getCallbackQuery().getData().split(" ");
+
+        if (callbackQueryData.length < 1) {
+            throw new InvalidCallbackQueryException("Incorrect number of words in the callbackQuery");
+        }
+
+        String commandName = callbackQueryData[0];
         BotCommand command = commandFactory.getCommand(commandName);
 
         executeMessage(command.execute(update));

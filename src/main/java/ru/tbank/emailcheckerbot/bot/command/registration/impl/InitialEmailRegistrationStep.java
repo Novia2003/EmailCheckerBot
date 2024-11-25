@@ -1,4 +1,4 @@
-package ru.tbank.emailcheckerbot.bot.command.registration;
+package ru.tbank.emailcheckerbot.bot.command.registration.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -7,8 +7,10 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.tbank.emailcheckerbot.entity.MailProvider;
-import ru.tbank.emailcheckerbot.service.UserEmailRedisService;
+import ru.tbank.emailcheckerbot.bot.command.registration.EmailRegistrationStep;
+import ru.tbank.emailcheckerbot.bot.command.registration.RegistrationStep;
+import ru.tbank.emailcheckerbot.dto.type.MailProvider;
+import ru.tbank.emailcheckerbot.service.user.UserEmailRedisService;
 
 import java.util.ArrayList;
 import java.util.List;
