@@ -1,8 +1,8 @@
-package ru.tbank.emailcheckerbot.service;
+package ru.tbank.emailcheckerbot.service.email;
 
 import org.springframework.stereotype.Service;
 import ru.tbank.emailcheckerbot.exeption.EmailAccessException;
-import ru.tbank.emailcheckerbot.message.EmailMessage;
+import ru.tbank.emailcheckerbot.dto.message.EmailMessageDTO;
 
 import javax.mail.AuthenticationFailedException;
 import javax.mail.Flags;
@@ -57,8 +57,8 @@ public class EmailSessionService {
         return lastUIDMessage;
     }
 
-    public EmailMessage getMessageByUID(Properties properties, String email, String token, long messageUID) {
-        EmailMessage emailMessage;
+    public EmailMessageDTO getMessageByUID(Properties properties, String email, String token, long messageUID) {
+        EmailMessageDTO emailMessageDTO;
 
         Folder folder;
         try {
@@ -69,7 +69,7 @@ public class EmailSessionService {
             uidFolder.getUIDNext();
             Message message = uidFolder.getMessageByUID(messageUID);
             message.setFlags(new Flags(Flags.Flag.SEEN), true);
-            emailMessage = EmailMessage.of(messageUID, message);
+            emailMessageDTO = EmailMessageDTO.of(messageUID, message);
 
             folder.close(false);
             folder.getStore().close();
@@ -77,11 +77,11 @@ public class EmailSessionService {
             throw new RuntimeException(e);
         }
 
-        return emailMessage;
+        return emailMessageDTO;
     }
 
-    public EmailMessage[] getNewMessages(Properties properties, String email, String token, long lastMessageUID) {
-        EmailMessage[] emailMessages;
+    public EmailMessageDTO[] getNewMessages(Properties properties, String email, String token, long lastMessageUID) {
+        EmailMessageDTO[] emailMessageDTOs;
 
         Folder folder;
         try {
@@ -91,10 +91,10 @@ public class EmailSessionService {
             UIDFolder uidFolder = (UIDFolder) folder;
             Message[] newMessages = uidFolder.getMessagesByUID(lastMessageUID + 1, UIDFolder.MAXUID);
 
-            emailMessages = new EmailMessage[newMessages.length];
+            emailMessageDTOs = new EmailMessageDTO[newMessages.length];
             for (int i = 0; i < newMessages.length; i++) {
                 Message message = newMessages[i];
-                emailMessages[i] = EmailMessage.of(uidFolder.getUID(message), message);
+                emailMessageDTOs[i] = EmailMessageDTO.of(uidFolder.getUID(message), message);
             }
 
             folder.close(false);
@@ -103,6 +103,6 @@ public class EmailSessionService {
             throw new RuntimeException(e);
         }
 
-        return emailMessages;
+        return emailMessageDTOs;
     }
 }

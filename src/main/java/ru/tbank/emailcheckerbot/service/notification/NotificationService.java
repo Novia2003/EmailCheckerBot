@@ -1,4 +1,4 @@
-package ru.tbank.emailcheckerbot.service;
+package ru.tbank.emailcheckerbot.service.notification;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import ru.tbank.emailcheckerbot.bot.TelegramBot;
 import ru.tbank.emailcheckerbot.configuration.property.MessagesProperties;
 import ru.tbank.emailcheckerbot.entity.jpa.UserEmailJpaEntity;
-import ru.tbank.emailcheckerbot.message.EmailMessage;
+import ru.tbank.emailcheckerbot.dto.message.EmailMessageDTO;
 
 import javax.mail.MessagingException;
 import java.util.Arrays;
@@ -28,7 +28,7 @@ public class NotificationService {
 
     private final TelegramBot telegramBot;
 
-    public void notifyUser(EmailMessage[] newMessages, UserEmailJpaEntity userEmailJpaEntity) {
+    public void notifyUser(EmailMessageDTO[] newMessages, UserEmailJpaEntity userEmailJpaEntity) {
         Arrays.stream(newMessages).forEach(message -> {
             try {
                 String notificationText = formatNotificationMessage(
@@ -44,25 +44,27 @@ public class NotificationService {
         });
     }
 
-    private String formatNotificationMessage(EmailMessage message, String userEmail) throws MessagingException {
+    private String formatNotificationMessage(EmailMessageDTO message, String userEmail) throws MessagingException {
         String senderEmail = message.getFrom();
         String subject = message.getSubject();
         String snippet =  extractSnippetFromMessage(message);
 
         return String.format(
                 """
-                        *📬 Новое сообщение на почте:* `%s`
-                        *Отправитель:* `%s`
-                        *Тема:* _%s_
+                        *📬 Новое сообщение на почте:* %s
                         
-                        *Сообщение:* `%s`
+                        *Отправитель:* %s
+                        
+                        *Тема:* %s
+                        
+                        *Сообщение:* %s
                         """,
                 userEmail, senderEmail, Optional.ofNullable(subject).orElse("Без темы"), snippet
         );
     }
 
 
-    private String extractSnippetFromMessage(EmailMessage message) {
+    private String extractSnippetFromMessage(EmailMessageDTO message) {
             String text = Jsoup.parse(message.getContent()).text();
 
             return text.length() > 100 ? text.substring(0, 100) + "..." : text;

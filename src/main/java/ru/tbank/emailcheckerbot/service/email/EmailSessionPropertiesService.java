@@ -1,8 +1,8 @@
-package ru.tbank.emailcheckerbot.service;
+package ru.tbank.emailcheckerbot.service.email;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.tbank.emailcheckerbot.configuration.property.EmailProviderProperties;
+import ru.tbank.emailcheckerbot.configuration.property.provider.EmailProviderProperties;
 
 import java.util.Properties;
 

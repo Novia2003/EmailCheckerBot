@@ -1,11 +1,14 @@
-package ru.tbank.emailcheckerbot.service;
+package ru.tbank.emailcheckerbot.service.email;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.tbank.emailcheckerbot.entity.jpa.UserEmailJpaEntity;
-import ru.tbank.emailcheckerbot.message.EmailMessage;
+import ru.tbank.emailcheckerbot.dto.message.EmailMessageDTO;
+import ru.tbank.emailcheckerbot.service.notification.NotificationService;
+import ru.tbank.emailcheckerbot.service.authentication.AuthenticationService;
+import ru.tbank.emailcheckerbot.service.user.UserEmailJpaService;
 
 import java.time.Instant;
 import java.util.List;
@@ -46,7 +49,7 @@ public class EmailCheckService {
             authenticationService.refreshToken(userEmailJpaEntity.getId(), true);
         }
 
-        EmailMessage[] newMessages = emailSessionService.getNewMessages(
+        EmailMessageDTO[] newMessages = emailSessionService.getNewMessages(
                 properties,
                 userEmailJpaEntity.getEmail(),
                 userEmailJpaEntity.getAccessToken(),
