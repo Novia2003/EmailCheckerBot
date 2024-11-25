@@ -17,11 +17,19 @@ email:
       port: 993
       ssl: true
       auth: XOAUTH2
+      auth-url: https://oauth.yandex.ru
+      client-id: e0261684b7fb476c8049cfe487c9c89b
+      client-secret: 3ac020b46deb4828a855c7b46b8a57ad
+      settings-url: https://mail.yandex.ru/#setup/client
     mailru:
       host: imap.mail.ru
       port: 993
       ssl: true
       auth: XOAUTH2
+      auth-url: https://oauth.mail.ru
+      client-id: c2e5ae1d247a4e1b827db598ff988021
+      client-secret: a3d25162637f42028f7d83f1c10e1f2c
+      settings-url: https://help.mail.ru/mail/security/apps/
   check:
     delay: PT1M
 
@@ -30,26 +38,12 @@ fixed:
     pool:
       size: 10
 
-yandex:
-  auth-url: https://oauth.yandex.ru
-  client-id: e0261684b7fb476c8049cfe487c9c89b
-  client-secret: 3ac020b46deb4828a855c7b46b8a57ad
-  settings-url: https://mail.yandex.ru/#setup/client
-
-mailru:
-  url: https://oauth.mail.ru
-  client-id: c2e5ae1d247a4e1b827db598ff988021
-  client-secret: a3d25162637f42028f7d83f1c10e1f2c
-  redirect-uri: http://127.0.0.1:8080/api/v1/oauth/receiver
-  settings-url: https://help.mail.ru/mail/security/apps/
-
 rest:
   yandex:
     user-info-url: https://login.yandex.ru
     oauth-url: https://oauth.yandex.ru
     read-timeout: 120s
     connect-timeout: 120s
-
   mailru:
     url: https://oauth.mail.ru
     read-timeout: 120s
@@ -57,6 +51,9 @@ rest:
 
 messages:
   url: http://127.0.0.1:8080/api/v1/messages
+
+redirect:
+  uri: http://127.0.0.1:8080/api/v1/oauth/receiver
 
 telegram:
   bot:

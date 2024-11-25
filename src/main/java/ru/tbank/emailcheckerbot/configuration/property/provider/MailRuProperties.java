@@ -1,4 +1,4 @@
-package ru.tbank.emailcheckerbot.configuration.property;
+package ru.tbank.emailcheckerbot.configuration.property.provider;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,11 +8,10 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties("mailru")
+@ConfigurationProperties("email.providers.mailru")
 public class MailRuProperties {
-    private String url;
+    private String authUrl;
     private String clientId;
     private String clientSecret;
-    private String redirectUri;
     private String settingsUrl;
 }

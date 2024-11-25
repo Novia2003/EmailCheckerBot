@@ -1,4 +1,4 @@
-package ru.tbank.emailcheckerbot.configuration.property;
+package ru.tbank.emailcheckerbot.configuration.property.rest;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,9 +10,10 @@ import java.time.Duration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties("rest.mailru")
-public class MailRuRestProperties {
-    private String url;
+@ConfigurationProperties("rest.yandex")
+public class YandexRestProperties {
+    private String userInfoUrl;
+    private String oauthUrl;
     private Duration readTimeout;
     private Duration connectTimeout;
 }

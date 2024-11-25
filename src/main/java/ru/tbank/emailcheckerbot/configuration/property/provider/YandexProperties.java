@@ -1,4 +1,4 @@
-package ru.tbank.emailcheckerbot.configuration.property;
+package ru.tbank.emailcheckerbot.configuration.property.provider;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties("yandex")
+@ConfigurationProperties("email.providers.yandex")
 public class YandexProperties {
     private String authUrl;
     private String clientId;

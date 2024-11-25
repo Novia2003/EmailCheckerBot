@@ -1,4 +1,4 @@
-package ru.tbank.emailcheckerbot.configuration.property;
+package ru.tbank.emailcheckerbot.configuration.property.provider;
 
 import lombok.Data;
 import lombok.Getter;
