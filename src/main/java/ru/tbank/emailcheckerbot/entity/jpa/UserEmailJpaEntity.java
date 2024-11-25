@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.tbank.emailcheckerbot.entity.MailProvider;
+import ru.tbank.emailcheckerbot.dto.type.MailProvider;
 
 import java.time.Instant;
 

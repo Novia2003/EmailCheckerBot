@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
-import ru.tbank.emailcheckerbot.entity.MailProvider;
+import ru.tbank.emailcheckerbot.dto.type.MailProvider;
 import ru.tbank.emailcheckerbot.bot.command.registration.RegistrationStep;
 
 import java.time.Instant;
