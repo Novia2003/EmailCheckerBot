@@ -1,4 +1,4 @@
-package ru.tbank.emailcheckerbot.entity;
+package ru.tbank.emailcheckerbot.dto.type;
 
 import lombok.Getter;
 
