@@ -1,8 +1,8 @@
-package ru.tbank.emailcheckerbot.service;
+package ru.tbank.emailcheckerbot.service.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.tbank.emailcheckerbot.entity.MailProvider;
+import ru.tbank.emailcheckerbot.dto.type.MailProvider;
 import ru.tbank.emailcheckerbot.dto.token.RefreshTokenResponseDTO;
 import ru.tbank.emailcheckerbot.entity.jpa.UserEmailJpaEntity;
 import ru.tbank.emailcheckerbot.entity.jpa.UserJpaEntity;

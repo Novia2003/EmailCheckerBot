@@ -1,8 +1,8 @@
-package ru.tbank.emailcheckerbot.service;
+package ru.tbank.emailcheckerbot.service.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.tbank.emailcheckerbot.entity.MailProvider;
+import ru.tbank.emailcheckerbot.dto.type.MailProvider;
 import ru.tbank.emailcheckerbot.dto.token.AccessTokenResponseDTO;
 import ru.tbank.emailcheckerbot.dto.token.RefreshTokenResponseDTO;
 import ru.tbank.emailcheckerbot.entity.redis.UserEmailRedisEntity;
@@ -114,13 +114,11 @@ public class UserEmailRedisService {
         return userEmailRedisEntity.getEndAccessTokenLife();
     }
 
-    public String getEmail(Long userId) {
+    public UserEmailRedisEntity getUserEmailRedisEntity(Long userId) {
         Optional<UserEmailRedisEntity> optionalUserEmailRedisEntity = userEmailRedisRepository.findById(userId);
-        UserEmailRedisEntity userEmailRedisEntity = optionalUserEmailRedisEntity.orElseThrow(
+        return optionalUserEmailRedisEntity.orElseThrow(
                 () -> new RuntimeException("UserEmailRedisEntity is not present")
         );
-
-        return userEmailRedisEntity.getEmail();
     }
 
     public void setLastMessageUID(Long userId, Long lastMessageUID) {
