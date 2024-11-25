@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import ru.tbank.emailcheckerbot.configuration.property.MailRuProperties;
+import ru.tbank.emailcheckerbot.configuration.property.RedirectUriProperties;
+import ru.tbank.emailcheckerbot.configuration.property.provider.MailRuProperties;
 import ru.tbank.emailcheckerbot.dto.mailru.MailRuUserInfoDTO;
 import ru.tbank.emailcheckerbot.dto.token.AccessTokenResponseDTO;
 import ru.tbank.emailcheckerbot.dto.token.RefreshTokenResponseDTO;
@@ -26,6 +27,7 @@ public class MailRuClientImpl implements MailRuClient {
     private static final String INFO_URL = "/userinfo";
 
     private final MailRuProperties mailRuProperties;
+    private final RedirectUriProperties redirectUriProperties;
 
     private final RestTemplate mailRuRestTemplate;
 
@@ -42,7 +44,7 @@ public class MailRuClientImpl implements MailRuClient {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("code", code);
-        params.add("redirect_uri", mailRuProperties.getRedirectUri());
+        params.add("redirect_uri", redirectUriProperties.getUri());
 
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(params, headers);
 
