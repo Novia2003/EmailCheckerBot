@@ -1,0 +1,48 @@
+package ru.tbank.emailcheckerbot.service.email;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import ru.tbank.emailcheckerbot.dto.type.MailProvider;
+import ru.tbank.emailcheckerbot.entity.jpa.UserEmailJpaEntity;
+import ru.tbank.emailcheckerbot.dto.message.EmailMessageDTO;
+import ru.tbank.emailcheckerbot.service.authentication.AuthenticationService;
+import ru.tbank.emailcheckerbot.service.user.UserEmailJpaService;
+
+import java.time.Instant;
+import java.util.Properties;
+
+@Service
+@RequiredArgsConstructor
+public class EmailUIDService {
+
+    private final EmailSessionPropertiesService emailSessionPropertiesService;
+    private final EmailSessionService emailSessionService;
+    private final UserEmailJpaService userEmailJpaService;
+    private final AuthenticationService authenticationService;
+
+    public long getLastMessageUID(String email, MailProvider emailProvider, String token) {
+        Properties properties = emailSessionPropertiesService.getSessionProperties(emailProvider.getConfigurationName());
+
+        return emailSessionService.getLastMessageUID(properties, email, token);
+    }
+
+    public String getMessageByUID(long userEmailId, long messageUID) {
+        UserEmailJpaEntity userEmail = userEmailJpaService.getUserEmail(userEmailId);
+        Properties properties = emailSessionPropertiesService.getSessionProperties(
+                userEmail.getMailProvider().getConfigurationName()
+        );
+
+        if (Instant.now().isAfter(userEmail.getEndAccessTokenLife())) {
+            authenticationService.refreshToken(userEmail.getId(), true);
+        }
+
+        EmailMessageDTO message = emailSessionService.getMessageByUID(
+                properties,
+                userEmail.getEmail(),
+                userEmail.getAccessToken(),
+                messageUID
+        );
+
+        return message.getContent();
+    }
+}

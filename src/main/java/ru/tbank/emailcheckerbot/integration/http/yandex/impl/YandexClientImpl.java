@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import ru.tbank.emailcheckerbot.configuration.property.YandexProperties;
+import ru.tbank.emailcheckerbot.configuration.property.provider.YandexProperties;
 import ru.tbank.emailcheckerbot.dto.token.AccessTokenResponseDTO;
 import ru.tbank.emailcheckerbot.dto.token.RefreshTokenResponseDTO;
 import ru.tbank.emailcheckerbot.dto.yandex.YandexUserInfoDTO;
