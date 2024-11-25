@@ -7,12 +7,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.tbank.emailcheckerbot.service.EmailUIDService;
+import ru.tbank.emailcheckerbot.service.email.EmailUIDService;
 
 @Controller
 @RequestMapping("/api/v1/messages")
@@ -35,7 +36,7 @@ public class MessageController {
                             responseCode = "200",
                             description = "Successful operation",
                             content = @Content(
-                                    mediaType = "text/html",
+                                    mediaType = MediaType.TEXT_HTML_VALUE,
                                     schema = @Schema(implementation = String.class)
                             )
                     ),
@@ -43,7 +44,7 @@ public class MessageController {
                             responseCode = "400",
                             description = "Invalid input",
                             content = @Content(
-                                    mediaType = "text/html",
+                                    mediaType = MediaType.TEXT_HTML_VALUE,
                                     schema = @Schema(implementation = String.class)
                             )
                     ),
@@ -51,7 +52,7 @@ public class MessageController {
                             responseCode = "404",
                             description = "Message not found",
                             content = @Content(
-                                    mediaType = "text/html",
+                                    mediaType = MediaType.TEXT_HTML_VALUE,
                                     schema = @Schema(implementation = String.class)
                             )
                     ),
@@ -59,7 +60,7 @@ public class MessageController {
                             responseCode = "503",
                             description = "Service unavailable",
                             content = @Content(
-                                    mediaType = "text/html",
+                                    mediaType = MediaType.TEXT_HTML_VALUE,
                                     schema = @Schema(implementation = String.class)
                             )
                     )
