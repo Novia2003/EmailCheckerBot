@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.tbank.emailcheckerbot.bot.TelegramBot;
 import ru.tbank.emailcheckerbot.configuration.property.MessagesProperties;
-import ru.tbank.emailcheckerbot.entity.postgre.UserEmailPostgreEntity;
+import ru.tbank.emailcheckerbot.entity.jpa.UserEmailJpaEntity;
 import ru.tbank.emailcheckerbot.message.EmailMessage;
 
 import javax.mail.MessagingException;
@@ -28,16 +28,16 @@ public class NotificationService {
 
     private final TelegramBot telegramBot;
 
-    public void notifyUser(EmailMessage[] newMessages, UserEmailPostgreEntity userEmailPostgreEntity) {
+    public void notifyUser(EmailMessage[] newMessages, UserEmailJpaEntity userEmailJpaEntity) {
         Arrays.stream(newMessages).forEach(message -> {
             try {
                 String notificationText = formatNotificationMessage(
                         message,
-                        userEmailPostgreEntity.getEmail()
+                        userEmailJpaEntity.getEmail()
                 );
 
-                String messageLink = getMessageLink(message.getUid(), userEmailPostgreEntity.getId());
-                sendNotification(userEmailPostgreEntity.getUser().getChatId(), notificationText, messageLink);
+                String messageLink = getMessageLink(message.getUid(), userEmailJpaEntity.getId());
+                sendNotification(userEmailJpaEntity.getUser().getChatId(), notificationText, messageLink);
             } catch (MessagingException e) {
                 log.error("Ошибка при формировании уведомления: {}", e.getMessage());
             }

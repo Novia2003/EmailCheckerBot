@@ -3,7 +3,7 @@ package ru.tbank.emailcheckerbot.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.tbank.emailcheckerbot.entity.MailProvider;
-import ru.tbank.emailcheckerbot.entity.postgre.UserEmailPostgreEntity;
+import ru.tbank.emailcheckerbot.entity.jpa.UserEmailJpaEntity;
 import ru.tbank.emailcheckerbot.message.EmailMessage;
 
 import java.time.Instant;
@@ -15,7 +15,7 @@ public class EmailUIDService {
 
     private final EmailSessionPropertiesService emailSessionPropertiesService;
     private final EmailSessionService emailSessionService;
-    private final UserEmailPostgreService userEmailPostgreService;
+    private final UserEmailJpaService userEmailJpaService;
     private final AuthenticationService authenticationService;
 
     public long getLastMessageUID(String email, MailProvider emailProvider, String token) {
@@ -25,7 +25,7 @@ public class EmailUIDService {
     }
 
     public String getMessageByUID(long userEmailId, long messageUID) {
-        UserEmailPostgreEntity userEmail = userEmailPostgreService.getUserEmail(userEmailId);
+        UserEmailJpaEntity userEmail = userEmailJpaService.getUserEmail(userEmailId);
         Properties properties = emailSessionPropertiesService.getSessionProperties(
                 userEmail.getMailProvider().getConfigurationName()
         );

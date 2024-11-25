@@ -12,7 +12,7 @@ import ru.tbank.emailcheckerbot.dto.token.RefreshTokenResponseDTO;
 public class AuthenticationService {
 
     private final UserEmailRedisService userEmailRedisService;
-    private final UserEmailPostgreService userEmailPostgreService;
+    private final UserEmailJpaService userEmailJpaService;
     private final MailRuService mailRuService;
     private final YandexService yandexService;
 
@@ -67,26 +67,26 @@ public class AuthenticationService {
 
     public void refreshToken(Long id, boolean isEmailRegistered) {
         MailProvider provider = (isEmailRegistered) ?
-                userEmailPostgreService.getMailProvider(id) : userEmailRedisService.getMailProvider(id);
+                userEmailJpaService.getMailProvider(id) : userEmailRedisService.getMailProvider(id);
 
         RefreshTokenResponseDTO refreshTokenResponseDTO;
 
         switch (provider) {
             case YANDEX -> refreshTokenResponseDTO = yandexService.getRefreshTokenResponse(
                     (isEmailRegistered) ?
-                            userEmailPostgreService.getRefreshToken(id) : userEmailRedisService.getRefreshToken(id)
+                            userEmailJpaService.getRefreshToken(id) : userEmailRedisService.getRefreshToken(id)
             );
 
             case MAILRu -> refreshTokenResponseDTO = mailRuService.getRefreshTokenResponse(
                     (isEmailRegistered) ?
-                            userEmailPostgreService.getRefreshToken(id) : userEmailRedisService.getRefreshToken(id)
+                            userEmailJpaService.getRefreshToken(id) : userEmailRedisService.getRefreshToken(id)
             );
 
             default -> throw new IllegalStateException("Unexpected value: " + provider);
         }
 
         if (isEmailRegistered) {
-            userEmailPostgreService.saveRefreshTokenResponse(id, refreshTokenResponseDTO);
+            userEmailJpaService.saveRefreshTokenResponse(id, refreshTokenResponseDTO);
         } else {
             userEmailRedisService.saveRefreshTokenResponse(id, refreshTokenResponseDTO);
         }

@@ -46,7 +46,7 @@ public class PermissionConfirmationStep implements EmailRegistrationStep {
         }
 
         userEmailRedisService.setLastMessageUID(userId, lastMessageUID);
-        userEmailRedisService.transferEntityFromRedisToPostgre(userId);
+        userEmailRedisService.transferEntityFromRedisToJpa(userId);
 
         SendMessage message = new SendMessage();
         message.setChatId(update.getCallbackQuery().getMessage().getChatId());

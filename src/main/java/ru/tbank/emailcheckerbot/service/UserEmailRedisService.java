@@ -20,7 +20,7 @@ public class UserEmailRedisService {
 
     private final UserEmailRedisRepository userEmailRedisRepository;
 
-    private final UserEmailPostgreService userEmailPostgreService;
+    private final UserEmailJpaService userEmailJpaService;
 
     public void createUserEmailRedisEntity(Long userId, Long chatId) {
         UserEmailRedisEntity userEmailRedisEntity = new UserEmailRedisEntity();
@@ -133,13 +133,13 @@ public class UserEmailRedisService {
         userEmailRedisRepository.save(userEmailRedisEntity);
     }
 
-    public void transferEntityFromRedisToPostgre(Long userId) {
+    public void transferEntityFromRedisToJpa(Long userId) {
         Optional<UserEmailRedisEntity> optionalUserEmailRedisEntity = userEmailRedisRepository.findById(userId);
         UserEmailRedisEntity userEmailRedisEntity = optionalUserEmailRedisEntity.orElseThrow(
                 () -> new RuntimeException("UserEmailRedisEntity is not present")
         );
 
-        userEmailPostgreService.saveEntityFromRedis(userEmailRedisEntity);
+        userEmailJpaService.saveEntityFromRedis(userEmailRedisEntity);
 
         userEmailRedisRepository.delete(userEmailRedisEntity);
     }

@@ -1,4 +1,4 @@
-package ru.tbank.emailcheckerbot.entity.postgre;
+package ru.tbank.emailcheckerbot.entity.jpa;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -17,7 +17,7 @@ import java.time.Instant;
 @Table(name = "user_emails")
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserEmailPostgreEntity {
+public class UserEmailJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,5 +48,5 @@ public class UserEmailPostgreEntity {
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @NotNull
-    private UserPostgreEntity user;
+    private UserJpaEntity user;
 }
