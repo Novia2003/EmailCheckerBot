@@ -103,6 +103,11 @@ public class UserEmailRedisService {
         UserEmailRedisEntity userEmailRedisEntity = getUserEmailRedisEntity(userId);
 
         userEmailJpaService.saveEntityFromRedis(userEmailRedisEntity);
+        userEmailRedisRepository.delete(userEmailRedisEntity);
+    }
+
+    public void deleteEntity(Long userId) {
+        UserEmailRedisEntity userEmailRedisEntity = getUserEmailRedisEntity(userId);
 
         userEmailRedisRepository.delete(userEmailRedisEntity);
     }

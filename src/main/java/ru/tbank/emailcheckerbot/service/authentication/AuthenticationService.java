@@ -6,7 +6,9 @@ import ru.tbank.emailcheckerbot.bot.command.Command;
 import ru.tbank.emailcheckerbot.dto.type.MailProvider;
 import ru.tbank.emailcheckerbot.dto.token.AccessTokenResponseDTO;
 import ru.tbank.emailcheckerbot.dto.token.RefreshTokenResponseDTO;
+import ru.tbank.emailcheckerbot.exeption.UserEmailRedisEntityNotFoundException;
 import ru.tbank.emailcheckerbot.service.provider.factory.MailServiceFactory;
+import ru.tbank.emailcheckerbot.service.user.UserEmailJpaService;
 import ru.tbank.emailcheckerbot.service.user.UserEmailRedisService;
 import ru.tbank.emailcheckerbot.service.user.UserEmailService;
 
@@ -16,6 +18,7 @@ public class AuthenticationService {
 
     private final UserEmailService userEmailService;
     private final UserEmailRedisService userEmailRedisService;
+    private final UserEmailJpaService userEmailJpaService;
 
     private final MailServiceFactory mailServiceFactory;
 
@@ -33,24 +36,23 @@ public class AuthenticationService {
         AccessTokenResponseDTO accessTokenResponse = mailServiceFactory.getService(provider).getAccessTokenResponse(code);
         String email = mailServiceFactory.getService(provider).getEmail(accessTokenResponse.getAccessToken());
 
-        userEmailRedisService.saveAccessTokenResponseAndEmail(
-                userId,
-                accessTokenResponse,
-                provider,
-                email
-                );
+        try {
+            if (userEmailJpaService.existsByUserIdAndEmail(userId, email)) {
+                userEmailRedisService.deleteEntity(userId);
+                return getEmailAlreadyRegisteredMessage(email);
+            }
+
+            userEmailRedisService.saveAccessTokenResponseAndEmail(
+                    userId,
+                    accessTokenResponse,
+                    provider,
+                    email
+            );
+        } catch (UserEmailRedisEntityNotFoundException e) {
+            return getUserInactivityMessage();
+        }
 
         return getSuccessfulGettingTokenMessage(email);
-    }
-
-    private String getUserInactivityMessage() {
-        return  "Вы долго бездействовали, и запись о Вас была удалена.\n" +
-                "Пожалуйста, начните процесс добавления почты с начала, набрав команду " + Command.ADD_EMAIL.getTitle();
-    }
-
-    private String getSuccessfulGettingTokenMessage(String email) {
-        return "Токен для работы с почтой " + email + " успешно получен.\n" +
-                "Можете вернуться в чат и смело нажать кнопку \"Выполнено\"";
     }
 
     public void refreshToken(Long id, boolean isEmailRegistered) {
@@ -61,5 +63,19 @@ public class AuthenticationService {
         );
 
         userEmailService.saveRefreshTokenResponse(id, isEmailRegistered, refreshTokenResponseDTO);
+    }
+
+    private String getUserInactivityMessage() {
+        return  "Вы долго бездействовали, и запись о Вас была удалена.\n" +
+                "Пожалуйста, начните процесс добавления почты с начала, набрав команду " + Command.ADD_EMAIL.getTitle();
+    }
+
+    private String getEmailAlreadyRegisteredMessage(String email) {
+        return "Почта " + email + " уже была зарегистрирована. Регистрация прекращена";
+    }
+
+    private String getSuccessfulGettingTokenMessage(String email) {
+        return "Токен для работы с почтой " + email + " успешно получен.\n" +
+                "Можете вернуться в чат и смело нажать кнопку \"Выполнено\"";
     }
 }
