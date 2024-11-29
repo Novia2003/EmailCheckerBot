@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import ru.tbank.emailcheckerbot.bot.command.registration.EmailRegistrationStep;
 import ru.tbank.emailcheckerbot.bot.command.registration.RegistrationStep;
 import ru.tbank.emailcheckerbot.dto.type.MailProvider;
+import ru.tbank.emailcheckerbot.exeption.UserEmailRedisEntityNotFoundException;
 import ru.tbank.emailcheckerbot.service.user.UserEmailRedisService;
 import ru.tbank.emailcheckerbot.service.provider.MailService;
 import ru.tbank.emailcheckerbot.service.provider.factory.MailServiceFactory;
@@ -33,22 +34,22 @@ public class GettingTokenStep implements EmailRegistrationStep {
         Long userId = update.getCallbackQuery().getFrom().getId();
         Long chatId = update.getCallbackQuery().getMessage().getChatId();
 
-        if (userEmailRedisService.isUserEmailRecordNotExists(userId)) {
+        try {
+            if (userEmailRedisService.getAccessToken(userId) == null) {
+                return getFailedOauthMessage(chatId);
+            }
+
+            MailProvider mailProvider = userEmailRedisService.getMailProvider(userId);
+            MailService mailService = mailServiceFactory.getService(mailProvider);
+
+            return handleProviderChoice(
+                    chatId,
+                    mailService.getInstructionForPermission(),
+                    mailService.getSettingsUrl()
+            );
+        } catch (UserEmailRedisEntityNotFoundException e) {
             return getUserInactivityMessage(chatId);
         }
-
-        if (userEmailRedisService.getAccessToken(userId) == null) {
-            return getFailedOauthMessage(chatId);
-        }
-
-        MailProvider mailProvider = userEmailRedisService.getMailProvider(userId);
-        MailService mailService = mailServiceFactory.getService(mailProvider);
-
-        return handleProviderChoice(
-                chatId,
-                mailService.getInstructionForPermission(),
-                mailService.getSettingsUrl()
-        );
     }
 
     private SendMessage handleProviderChoice(Long chatId, String responseText, String settingsUrl) {
