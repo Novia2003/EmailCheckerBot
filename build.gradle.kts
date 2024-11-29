@@ -46,6 +46,8 @@ dependencies {
 	implementation("redis.clients:jedis:5.2.0")
 
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+
+	implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
 }
 
 tasks.withType<Test> {
