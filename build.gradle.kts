@@ -2,6 +2,7 @@ plugins {
 	java
 	id("org.springframework.boot") version "3.3.4"
 	id("io.spring.dependency-management") version "1.1.6"
+	id("jacoco")
 }
 
 group = "ru.tbank"
@@ -49,4 +50,34 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+jacoco {
+	toolVersion = "0.8.8"
+}
+
+val jacocoExclusions = listOf(
+	"ru/tbank/emailcheckerbot/configuration/**",
+	"ru/tbank/emailcheckerbot/dto/**",
+	"ru/tbank/emailcheckerbot/entity/**",
+	"ru/tbank/emailcheckerbot/exception/**",
+	"ru/tbank/emailcheckerbot/repository/**"
+)
+
+tasks.jacocoTestReport {
+	dependsOn(tasks.test)
+	classDirectories.setFrom(
+		files(
+			classDirectories.files.map {
+				fileTree(it) {
+					exclude(jacocoExclusions)
+				}
+			}
+		)
+	)
+	reports {
+		xml.required.set(true)
+		csv.required.set(true)
+		html.required.set(true)
+	}
 }
