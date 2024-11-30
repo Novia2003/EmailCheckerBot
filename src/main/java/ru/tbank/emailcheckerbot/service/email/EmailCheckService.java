@@ -39,7 +39,7 @@ public class EmailCheckService {
         log.info("Email check process completed");
     }
 
-    private void checkForNewMessages(UserEmailJpaEntity userEmailJpaEntity) {
+    public void checkForNewMessages(UserEmailJpaEntity userEmailJpaEntity) {
         Properties properties = emailSessionPropertiesService.getSessionProperties(
                 userEmailJpaEntity.getMailProvider().getConfigurationName()
         );
