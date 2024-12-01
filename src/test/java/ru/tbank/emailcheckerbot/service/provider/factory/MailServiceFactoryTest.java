@@ -14,7 +14,6 @@ import ru.tbank.emailcheckerbot.service.provider.impl.MailRuService;
 import ru.tbank.emailcheckerbot.service.provider.impl.YandexService;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,8 +45,7 @@ class MailServiceFactoryTest {
     @Test
     void getService_shouldReturnCorrectServiceForYandexProvider() {
         when(yandexService.getMailProvider()).thenReturn(MailProvider.YANDEX);
-        List<MailService> serviceList = Arrays.asList(yandexService, mailRuService);
-        mailServiceFactory = new MailServiceFactory(serviceList);
+        mailServiceFactory = new MailServiceFactory(list);
 
         MailService result = mailServiceFactory.getService(MailProvider.YANDEX);
 
@@ -57,8 +55,7 @@ class MailServiceFactoryTest {
     @Test
     void getService_shouldReturnCorrectServiceForMailRuProvider() {
         when(mailRuService.getMailProvider()).thenReturn(MailProvider.MAILRu);
-        List<MailService> serviceList = Arrays.asList(yandexService, mailRuService);
-        mailServiceFactory = new MailServiceFactory(serviceList);
+        mailServiceFactory = new MailServiceFactory(list);
 
         MailService result = mailServiceFactory.getService(MailProvider.MAILRu);
 
@@ -70,8 +67,7 @@ class MailServiceFactoryTest {
         MailProvider testProvider = mock(MailProvider.class);
         when(yandexService.getMailProvider()).thenReturn(MailProvider.YANDEX);
         when(mailRuService.getMailProvider()).thenReturn(MailProvider.MAILRu);
-        List<MailService> serviceList = Arrays.asList(yandexService, mailRuService);
-        mailServiceFactory = new MailServiceFactory(serviceList);
+        mailServiceFactory = new MailServiceFactory(list);
 
         assertThrows(MailServiceNotFoundException.class, () -> mailServiceFactory.getService(testProvider));
     }
