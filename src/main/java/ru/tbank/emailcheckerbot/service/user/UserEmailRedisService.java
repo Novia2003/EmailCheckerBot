@@ -2,15 +2,15 @@ package ru.tbank.emailcheckerbot.service.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.tbank.emailcheckerbot.dto.type.MailProvider;
 import ru.tbank.emailcheckerbot.dto.token.AccessTokenResponseDTO;
 import ru.tbank.emailcheckerbot.dto.token.RefreshTokenResponseDTO;
+import ru.tbank.emailcheckerbot.dto.type.MailProvider;
 import ru.tbank.emailcheckerbot.entity.redis.UserEmailRedisEntity;
+import ru.tbank.emailcheckerbot.exeption.UserEmailRedisEntityNotFoundException;
 import ru.tbank.emailcheckerbot.repository.redis.UserEmailRedisRepository;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -36,10 +36,7 @@ public class UserEmailRedisService {
             MailProvider mailProvider,
             String email
     ) {
-        Optional<UserEmailRedisEntity> optionalUserEmailRedisEntity = userEmailRedisRepository.findById(userId);
-        UserEmailRedisEntity userEmailRedisEntity = optionalUserEmailRedisEntity.orElseThrow(
-                () -> new RuntimeException("UserEmailRedisEntity is not present")
-        );
+        UserEmailRedisEntity userEmailRedisEntity = getUserEmailRedisEntity(userId);
 
         userEmailRedisEntity.setAccessToken(dto.getAccessToken());
         userEmailRedisEntity.setRefreshToken(dto.getRefreshToken());
@@ -51,10 +48,7 @@ public class UserEmailRedisService {
     }
 
     public void saveRefreshTokenResponse(Long id, RefreshTokenResponseDTO dto) {
-        Optional<UserEmailRedisEntity> optionalUserEmailRedisEntity = userEmailRedisRepository.findById(id);
-        UserEmailRedisEntity userEmailRedisEntity = optionalUserEmailRedisEntity.orElseThrow(
-                () -> new RuntimeException("UserEmailRedisEntity is not present")
-        );
+        UserEmailRedisEntity userEmailRedisEntity = getUserEmailRedisEntity(id);
 
         userEmailRedisEntity.setAccessToken(dto.getAccessToken());
         userEmailRedisEntity.setEndAccessTokenLife(calculateEndAccessTokenLife(dto.getExpiresIn()));
@@ -64,7 +58,6 @@ public class UserEmailRedisService {
         }
 
         userEmailRedisRepository.save(userEmailRedisEntity);
-
     }
 
     private Instant calculateEndAccessTokenLife(Long expiresIn) {
@@ -79,65 +72,42 @@ public class UserEmailRedisService {
     }
 
     public String getAccessToken(Long userId) {
-        Optional<UserEmailRedisEntity> optionalUserEmailRedisEntity = userEmailRedisRepository.findById(userId);
-        UserEmailRedisEntity userEmailRedisEntity = optionalUserEmailRedisEntity.orElseThrow(
-                () -> new RuntimeException("UserEmailRedisEntity is not present")
-        );
-
-        return userEmailRedisEntity.getAccessToken();
+        return getUserEmailRedisEntity(userId).getAccessToken();
     }
 
     public String getRefreshToken(Long userId) {
-        Optional<UserEmailRedisEntity> optionalUserEmailRedisEntity = userEmailRedisRepository.findById(userId);
-        UserEmailRedisEntity userEmailRedisEntity = optionalUserEmailRedisEntity.orElseThrow(
-                () -> new RuntimeException("UserEmailRedisEntity is not present")
-        );
-
-        return userEmailRedisEntity.getRefreshToken();
+        return getUserEmailRedisEntity(userId).getRefreshToken();
     }
 
     public MailProvider getMailProvider(Long userId) {
-        Optional<UserEmailRedisEntity> optionalUserEmailRedisEntity = userEmailRedisRepository.findById(userId);
-        UserEmailRedisEntity userEmailRedisEntity = optionalUserEmailRedisEntity.orElseThrow(
-                () -> new RuntimeException("UserEmailRedisEntity is not present")
-        );
-
-        return userEmailRedisEntity.getMailProvider();
+        return getUserEmailRedisEntity(userId).getMailProvider();
     }
 
     public Instant getEndAccessTokenLife(Long userId) {
-        Optional<UserEmailRedisEntity> optionalUserEmailRedisEntity = userEmailRedisRepository.findById(userId);
-        UserEmailRedisEntity userEmailRedisEntity = optionalUserEmailRedisEntity.orElseThrow(
-                () -> new RuntimeException("UserEmailRedisEntity is not present")
-        );
-
-        return userEmailRedisEntity.getEndAccessTokenLife();
+        return getUserEmailRedisEntity(userId).getEndAccessTokenLife();
     }
 
     public UserEmailRedisEntity getUserEmailRedisEntity(Long userId) {
-        Optional<UserEmailRedisEntity> optionalUserEmailRedisEntity = userEmailRedisRepository.findById(userId);
-        return optionalUserEmailRedisEntity.orElseThrow(
-                () -> new RuntimeException("UserEmailRedisEntity is not present")
-        );
+        return userEmailRedisRepository.findById(userId)
+                .orElseThrow(() -> new UserEmailRedisEntityNotFoundException("UserEmailRedisEntity is not present"));
     }
 
     public void setLastMessageUID(Long userId, Long lastMessageUID) {
-        Optional<UserEmailRedisEntity> optionalUserEmailRedisEntity = userEmailRedisRepository.findById(userId);
-        UserEmailRedisEntity userEmailRedisEntity = optionalUserEmailRedisEntity.orElseThrow(
-                () -> new RuntimeException("UserEmailRedisEntity is not present")
-        );
+        UserEmailRedisEntity userEmailRedisEntity = getUserEmailRedisEntity(userId);
 
         userEmailRedisEntity.setLastMessageUID(lastMessageUID);
         userEmailRedisRepository.save(userEmailRedisEntity);
     }
 
     public void transferEntityFromRedisToJpa(Long userId) {
-        Optional<UserEmailRedisEntity> optionalUserEmailRedisEntity = userEmailRedisRepository.findById(userId);
-        UserEmailRedisEntity userEmailRedisEntity = optionalUserEmailRedisEntity.orElseThrow(
-                () -> new RuntimeException("UserEmailRedisEntity is not present")
-        );
+        UserEmailRedisEntity userEmailRedisEntity = getUserEmailRedisEntity(userId);
 
         userEmailJpaService.saveEntityFromRedis(userEmailRedisEntity);
+        userEmailRedisRepository.delete(userEmailRedisEntity);
+    }
+
+    public void deleteEntity(Long userId) {
+        UserEmailRedisEntity userEmailRedisEntity = getUserEmailRedisEntity(userId);
 
         userEmailRedisRepository.delete(userEmailRedisEntity);
     }

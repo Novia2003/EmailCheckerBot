@@ -8,8 +8,11 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.tbank.emailcheckerbot.bot.command.BotCommand;
+import ru.tbank.emailcheckerbot.bot.command.Command;
 import ru.tbank.emailcheckerbot.bot.command.factory.CommandFactory;
 import ru.tbank.emailcheckerbot.exeption.InvalidCallbackQueryException;
+
+import java.util.NoSuchElementException;
 
 @Slf4j
 @Component
@@ -37,10 +40,12 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void handleMessage(Update update) {
         String messageText = update.getMessage().getText();
 
-        BotCommand command = commandFactory.getCommand(messageText);
-
-        if (command != null) {
+        try {
+            BotCommand command = commandFactory.getCommand(messageText);
             executeMessage(command.execute(update));
+        } catch (NoSuchElementException e) {
+            BotCommand commandsList = commandFactory.getCommand(Command.COMMANDS.getTitle());
+            executeMessage(commandsList.execute(update));
         }
     }
 

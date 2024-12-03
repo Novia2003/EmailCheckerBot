@@ -8,6 +8,7 @@ import ru.tbank.emailcheckerbot.bot.command.registration.EmailRegistrationStep;
 import ru.tbank.emailcheckerbot.bot.command.registration.RegistrationStep;
 import ru.tbank.emailcheckerbot.entity.redis.UserEmailRedisEntity;
 import ru.tbank.emailcheckerbot.exeption.EmailAccessException;
+import ru.tbank.emailcheckerbot.exeption.UserEmailRedisEntityNotFoundException;
 import ru.tbank.emailcheckerbot.service.authentication.AuthenticationService;
 import ru.tbank.emailcheckerbot.service.email.EmailUIDService;
 import ru.tbank.emailcheckerbot.service.user.UserEmailRedisService;
@@ -29,36 +30,36 @@ public class PermissionConfirmationStep implements EmailRegistrationStep {
         Long userId = update.getCallbackQuery().getFrom().getId();
         Long chatId = update.getCallbackQuery().getMessage().getChatId();
 
-        if (userEmailRedisService.isUserEmailRecordNotExists(userId)) {
+        try {
+            if (Instant.now().isAfter(userEmailRedisService.getEndAccessTokenLife(userId))) {
+                authenticationService.refreshToken(userId, false);
+            }
+
+            long lastMessageUID;
+
+            try {
+                UserEmailRedisEntity userEmailRedisEntity = userEmailRedisService.getUserEmailRedisEntity(userId);
+
+                lastMessageUID = emailUIDService.getLastMessageUID(
+                        userEmailRedisEntity.getEmail(),
+                        userEmailRedisEntity.getMailProvider(),
+                        userEmailRedisEntity.getAccessToken()
+                );
+            } catch (EmailAccessException e) {
+                return getFailedPermissionConfirmationMessage(chatId, e.getMessage());
+            }
+
+            userEmailRedisService.setLastMessageUID(userId, lastMessageUID);
+            userEmailRedisService.transferEntityFromRedisToJpa(userId);
+
+            SendMessage message = new SendMessage();
+            message.setChatId(update.getCallbackQuery().getMessage().getChatId());
+            message.setText("Поздравляем! Ваш аккаунт успешно добавлен для проверки почты.");
+
+            return message;
+        } catch (UserEmailRedisEntityNotFoundException e) {
             return getUserInactivityMessage(chatId);
         }
-
-        if (Instant.now().isAfter(userEmailRedisService.getEndAccessTokenLife(userId))) {
-            authenticationService.refreshToken(userId, false);
-        }
-
-        long lastMessageUID;
-
-        try {
-            UserEmailRedisEntity userEmailRedisEntity = userEmailRedisService.getUserEmailRedisEntity(userId);
-
-            lastMessageUID = emailUIDService.getLastMessageUID(
-                    userEmailRedisEntity.getEmail(),
-                    userEmailRedisEntity.getMailProvider(),
-                    userEmailRedisEntity.getAccessToken()
-            );
-        } catch (EmailAccessException e) {
-            return getFailedPermissionConfirmationMessage(chatId, e.getMessage());
-        }
-
-        userEmailRedisService.setLastMessageUID(userId, lastMessageUID);
-        userEmailRedisService.transferEntityFromRedisToJpa(userId);
-
-        SendMessage message = new SendMessage();
-        message.setChatId(update.getCallbackQuery().getMessage().getChatId());
-        message.setText("Поздравляем! Ваш аккаунт успешно добавлен для проверки почты.");
-
-        return message;
     }
 
     @Override

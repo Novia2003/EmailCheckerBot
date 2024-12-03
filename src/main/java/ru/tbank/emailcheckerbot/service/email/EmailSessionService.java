@@ -43,7 +43,6 @@ public class EmailSessionService {
             folder = getInboxFolder(properties, email, token);
             folder.open(Folder.READ_ONLY);
             UIDFolder uidFolder = (UIDFolder) folder;
-            uidFolder.getUIDNext();
             lastUIDMessage = uidFolder.getUIDNext() - 1;
 
             folder.close(false);
@@ -66,7 +65,6 @@ public class EmailSessionService {
             folder.open(Folder.READ_WRITE);
 
             UIDFolder uidFolder = (UIDFolder) folder;
-            uidFolder.getUIDNext();
             Message message = uidFolder.getMessageByUID(messageUID);
             message.setFlags(new Flags(Flags.Flag.SEEN), true);
             emailMessageDTO = EmailMessageDTO.of(messageUID, message);

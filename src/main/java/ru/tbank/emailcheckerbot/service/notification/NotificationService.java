@@ -1,5 +1,6 @@
 package ru.tbank.emailcheckerbot.service.notification;
 
+import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -24,6 +25,8 @@ import static ru.tbank.emailcheckerbot.bot.util.TelegramUtils.createInlineKeyboa
 @RequiredArgsConstructor
 public class NotificationService {
 
+    private static final Integer MAX_SNIPPET_LENGTH = 100;
+
     private final MessagesProperties messagesProperties;
 
     private final TelegramBot telegramBot;
@@ -47,7 +50,7 @@ public class NotificationService {
     private String formatNotificationMessage(EmailMessageDTO message, String userEmail) throws MessagingException {
         String senderEmail = message.getFrom();
         String subject = message.getSubject();
-        String snippet =  extractSnippetFromMessage(message);
+        String snippet = extractSnippetFromMessage(message);
 
         return String.format(
                 """
@@ -65,9 +68,16 @@ public class NotificationService {
 
 
     private String extractSnippetFromMessage(EmailMessageDTO message) {
-            String text = Jsoup.parse(message.getContent()).text();
+        String content = message.getContent();
 
-            return text.length() > 100 ? text.substring(0, 100) + "..." : text;
+        String text = Jsoup.parse(content).text();
+
+        if (text.length() <= MAX_SNIPPET_LENGTH) {
+            FlexmarkHtmlConverter converter = FlexmarkHtmlConverter.builder().build();
+            return converter.convert(content);
+        } else {
+            return  text.substring(0, MAX_SNIPPET_LENGTH) + "...";
+        }
     }
 
     private String getMessageLink(Long uid, Long userEmailEntityId) {

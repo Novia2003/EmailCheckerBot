@@ -2,18 +2,18 @@ package ru.tbank.emailcheckerbot.service.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.tbank.emailcheckerbot.dto.type.MailProvider;
 import ru.tbank.emailcheckerbot.dto.token.RefreshTokenResponseDTO;
+import ru.tbank.emailcheckerbot.dto.type.MailProvider;
 import ru.tbank.emailcheckerbot.entity.jpa.UserEmailJpaEntity;
 import ru.tbank.emailcheckerbot.entity.jpa.UserJpaEntity;
 import ru.tbank.emailcheckerbot.entity.redis.UserEmailRedisEntity;
+import ru.tbank.emailcheckerbot.exeption.UserEmailJpaEntityNotFoundException;
 import ru.tbank.emailcheckerbot.repository.jpa.UserEmailJpaRepository;
 import ru.tbank.emailcheckerbot.repository.jpa.UserJpaRepository;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,11 +25,7 @@ public class UserEmailJpaService {
     private final UserEmailJpaRepository userEmailJpaRepository;
 
     public void saveRefreshTokenResponse(Long id, RefreshTokenResponseDTO dto) {
-
-        Optional<UserEmailJpaEntity> optionalUserEmailRedisEntity = userEmailJpaRepository.findById(id);
-        UserEmailJpaEntity userEmailJpaEntity = optionalUserEmailRedisEntity.orElseThrow(
-                () -> new RuntimeException("UserEmailRedisEntity is not present")
-        );
+        UserEmailJpaEntity userEmailJpaEntity = getUserEmailJpaEntity(id);
 
         userEmailJpaEntity.setAccessToken(dto.getAccessToken());
         userEmailJpaEntity.setEndAccessTokenLife(calculateEndAccessTokenLife(dto.getExpiresIn()));
@@ -49,21 +45,11 @@ public class UserEmailJpaService {
     }
 
     public String getRefreshToken(Long id) {
-        Optional<UserEmailJpaEntity> optionalUserEmailRedisEntity = userEmailJpaRepository.findById(id);
-        UserEmailJpaEntity userEmailJpaEntity = optionalUserEmailRedisEntity.orElseThrow(
-                () -> new RuntimeException("UserEmailRedisEntity is not present")
-        );
-
-        return userEmailJpaEntity.getRefreshToken();
+        return getUserEmailJpaEntity(id).getRefreshToken();
     }
 
     public MailProvider getMailProvider(Long id) {
-        Optional<UserEmailJpaEntity> optionalUserEmailRedisEntity = userEmailJpaRepository.findById(id);
-        UserEmailJpaEntity userEmailJpaEntity = optionalUserEmailRedisEntity.orElseThrow(
-                () -> new RuntimeException("UserEmailRedisEntity is not present")
-        );
-
-        return userEmailJpaEntity.getMailProvider();
+        return getUserEmailJpaEntity(id).getMailProvider();
     }
 
     public void saveEntityFromRedis(UserEmailRedisEntity redisEntity) {
@@ -71,8 +57,8 @@ public class UserEmailJpaService {
 
         UserJpaEntity user;
 
-        if (userJpaRepository.existsById(userId)) {
-            user = userJpaRepository.getReferenceById(userId);
+        if (userJpaRepository.existsByTelegramId(userId)) {
+            user = userJpaRepository.getByTelegramId(userId);
         } else {
             user = new UserJpaEntity();
             user.setTelegramId(userId);
@@ -105,15 +91,27 @@ public class UserEmailJpaService {
     }
 
     public void setLastMessageUID(Long id, Long lastMessageUID) {
-        Optional<UserEmailJpaEntity> optionalUserEmailRedisEntity = userEmailJpaRepository.findById(id);
-        UserEmailJpaEntity userEmailJpaEntity = optionalUserEmailRedisEntity.orElseThrow(
-                () -> new RuntimeException("UserEmailRedisEntity is not present")
-        );
+        UserEmailJpaEntity userEmailJpaEntity = getUserEmailJpaEntity(id);
         userEmailJpaEntity.setLastMessageUID(lastMessageUID);
         userEmailJpaRepository.save(userEmailJpaEntity);
     }
 
     public UserEmailJpaEntity getUserEmail(Long id) {
         return userEmailJpaRepository.getReferenceById(id);
+    }
+
+    public boolean existsByUserIdAndEmail(Long userId, String email) {
+        if (!userJpaRepository.existsByTelegramId(userId)) {
+            return false;
+        }
+
+        UserJpaEntity user = userJpaRepository.getByTelegramId(userId);
+
+        return userEmailJpaRepository.existsByUserAndEmail(user, email);
+    }
+
+    private UserEmailJpaEntity getUserEmailJpaEntity(Long id) {
+        return userEmailJpaRepository.findById(id)
+                .orElseThrow(() -> new UserEmailJpaEntityNotFoundException("UserEmailJpaEntity is not present"));
     }
 }
