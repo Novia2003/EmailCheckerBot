@@ -18,10 +18,11 @@ repositories {
 	mavenCentral()
 }
 
+val wiremockTestcontainersVersion: String by extra("1.0-alpha-13")
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 	implementation("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
@@ -48,6 +49,14 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
 	implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
+
+	testImplementation(platform("org.junit:junit-bom:5.10.0"))
+	testImplementation("org.junit.jupiter:junit-jupiter")
+
+	testImplementation("io.rest-assured:rest-assured")
+	testImplementation("org.wiremock:wiremock-standalone:3.6.0")
+	testImplementation("org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:$wiremockTestcontainersVersion")
+	testImplementation("org.testcontainers:junit-jupiter:1.19.7")
 }
 
 tasks.withType<Test> {
