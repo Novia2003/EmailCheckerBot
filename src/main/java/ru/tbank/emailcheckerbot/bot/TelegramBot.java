@@ -43,10 +43,18 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             BotCommand command = commandFactory.getCommand(messageText);
             executeMessage(command.execute(update));
+
+            if (command.getName().equals(Command.START.getTitle())) {
+                executeCommandsList(update);
+            }
         } catch (NoSuchElementException e) {
-            BotCommand commandsList = commandFactory.getCommand(Command.COMMANDS.getTitle());
-            executeMessage(commandsList.execute(update));
+            executeCommandsList(update);
         }
+    }
+
+    private void executeCommandsList(Update update) {
+        BotCommand commandsList = commandFactory.getCommand(Command.COMMANDS.getTitle());
+        executeMessage(commandsList.execute(update));
     }
 
     private void handleCallbackQuery(Update update) {
