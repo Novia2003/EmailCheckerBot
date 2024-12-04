@@ -24,7 +24,6 @@ public class AddEmailCommand implements BotCommand {
 
         String[] callbackQueryData = update.getCallbackQuery().getData().split(" ");
 
-
         if (callbackQueryData.length < 2) {
             throw new InvalidCallbackQueryException("Incorrect number of words in the callbackQuery");
         }

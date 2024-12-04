@@ -110,6 +110,28 @@ public class UserEmailJpaService {
         return userEmailJpaRepository.existsByUserAndEmail(user, email);
     }
 
+    public List<UserEmailJpaEntity> getEmailsList(Long userTelegramId) {
+        if (!userJpaRepository.existsByTelegramId(userTelegramId)) {
+            return null;
+        }
+
+        UserJpaEntity user = userJpaRepository.getByTelegramId(userTelegramId);
+
+        return userEmailJpaRepository.findByUser(user);
+    }
+
+    public String removeEmail(Long userEmailId) {
+        try {
+            UserEmailJpaEntity entity = getUserEmailJpaEntity(userEmailId);
+            String email = entity.getEmail();
+            userEmailJpaRepository.delete(entity);
+
+            return email;
+        } catch (UserEmailJpaEntityNotFoundException e) {
+            return null;
+        }
+    }
+
     private UserEmailJpaEntity getUserEmailJpaEntity(Long id) {
         return userEmailJpaRepository.findById(id)
                 .orElseThrow(() -> new UserEmailJpaEntityNotFoundException("UserEmailJpaEntity is not present"));

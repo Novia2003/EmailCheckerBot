@@ -260,4 +260,56 @@ class UserEmailJpaServiceTest {
 
         assertFalse(result);
     }
+
+    @Test
+    void getEmailsList_shouldReturnEmailsListWhenUserExists() {
+        Long userTelegramId = 1L;
+        UserJpaEntity user = new UserJpaEntity();
+        UserEmailJpaEntity userEmailJpaEntity = new UserEmailJpaEntity();
+
+        when(userJpaRepository.existsByTelegramId(userTelegramId)).thenReturn(true);
+        when(userJpaRepository.getByTelegramId(userTelegramId)).thenReturn(user);
+        when(userEmailJpaRepository.findByUser(user)).thenReturn(Collections.singletonList(userEmailJpaEntity));
+
+        List<UserEmailJpaEntity> result = userEmailJpaService.getEmailsList(userTelegramId);
+
+        assertEquals(1, result.size());
+        assertEquals(userEmailJpaEntity, result.get(0));
+    }
+
+    @Test
+    void getEmailsList_shouldReturnNullWhenUserDoesNotExist() {
+        Long userTelegramId = 1L;
+
+        when(userJpaRepository.existsByTelegramId(userTelegramId)).thenReturn(false);
+
+        List<UserEmailJpaEntity> result = userEmailJpaService.getEmailsList(userTelegramId);
+
+        assertNull(result);
+    }
+
+    @Test
+    void removeEmail_shouldReturnEmailWhenEntityExists() {
+        Long userEmailId = 1L;
+        UserEmailJpaEntity entity = new UserEmailJpaEntity();
+        entity.setEmail("slavik@mail.com");
+
+        when(userEmailJpaRepository.findById(userEmailId)).thenReturn(Optional.of(entity));
+
+        String result = userEmailJpaService.removeEmail(userEmailId);
+
+        assertEquals(entity.getEmail(), result);
+        verify(userEmailJpaRepository).delete(entity);
+    }
+
+    @Test
+    void removeEmail_shouldReturnNullWhenEntityNotFound() {
+        Long userEmailId = 1L;
+
+        when(userEmailJpaRepository.findById(userEmailId)).thenReturn(Optional.empty());
+
+        String result = userEmailJpaService.removeEmail(userEmailId);
+
+        assertNull(result);
+    }
 }
