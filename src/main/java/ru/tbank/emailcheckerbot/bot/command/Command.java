@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum Command {
     START("/start"),
     ADD_EMAIL("/add_email"),
-    COMMANDS("/commands");
+    COMMANDS("/commands"),
+    EMAILS_LIST("/emails");
 
     private final String title;
 
