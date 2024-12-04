@@ -287,4 +287,29 @@ class UserEmailJpaServiceTest {
 
         assertNull(result);
     }
+
+    @Test
+    void removeEmail_shouldReturnEmailWhenEntityExists() {
+        Long userEmailId = 1L;
+        UserEmailJpaEntity entity = new UserEmailJpaEntity();
+        entity.setEmail("slavik@mail.com");
+
+        when(userEmailJpaRepository.findById(userEmailId)).thenReturn(Optional.of(entity));
+
+        String result = userEmailJpaService.removeEmail(userEmailId);
+
+        assertEquals(entity.getEmail(), result);
+        verify(userEmailJpaRepository).delete(entity);
+    }
+
+    @Test
+    void removeEmail_shouldReturnNullWhenEntityNotFound() {
+        Long userEmailId = 1L;
+
+        when(userEmailJpaRepository.findById(userEmailId)).thenReturn(Optional.empty());
+
+        String result = userEmailJpaService.removeEmail(userEmailId);
+
+        assertNull(result);
+    }
 }

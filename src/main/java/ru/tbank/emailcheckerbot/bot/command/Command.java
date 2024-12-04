@@ -7,7 +7,8 @@ public enum Command {
     START("/start"),
     ADD_EMAIL("/add_email"),
     COMMANDS("/commands"),
-    EMAILS_LIST("/emails");
+    EMAILS_LIST("/emails"),
+    REMOVE_EMAIL("/remove_email");
 
     private final String title;
 

@@ -120,6 +120,18 @@ public class UserEmailJpaService {
         return userEmailJpaRepository.findByUser(user);
     }
 
+    public String removeEmail(Long userEmailId) {
+        try {
+            UserEmailJpaEntity entity = getUserEmailJpaEntity(userEmailId);
+            String email = entity.getEmail();
+            userEmailJpaRepository.delete(entity);
+
+            return email;
+        } catch (UserEmailJpaEntityNotFoundException e) {
+            return null;
+        }
+    }
+
     private UserEmailJpaEntity getUserEmailJpaEntity(Long id) {
         return userEmailJpaRepository.findById(id)
                 .orElseThrow(() -> new UserEmailJpaEntityNotFoundException("UserEmailJpaEntity is not present"));
