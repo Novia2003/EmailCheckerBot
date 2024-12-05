@@ -7,6 +7,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST}
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
 
