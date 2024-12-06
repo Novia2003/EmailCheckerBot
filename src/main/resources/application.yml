@@ -58,6 +58,9 @@ messages:
 redirect:
   uri: ${REDIRECT_URI}
 
+encryption:
+  key: ${ENCRYPTION_KEY}
+
 telegram:
   bot:
     token: ${TELEGRAM_BOT_TOKEN}

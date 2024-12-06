@@ -12,6 +12,8 @@ import ru.tbank.emailcheckerbot.bot.TelegramBot;
 import ru.tbank.emailcheckerbot.configuration.property.MessagesProperties;
 import ru.tbank.emailcheckerbot.entity.jpa.UserEmailJpaEntity;
 import ru.tbank.emailcheckerbot.dto.message.EmailMessageDTO;
+import ru.tbank.emailcheckerbot.exeption.EncryptionException;
+import ru.tbank.emailcheckerbot.service.encryption.EncryptionService;
 
 import javax.mail.MessagingException;
 import java.util.Arrays;
@@ -31,6 +33,8 @@ public class NotificationService {
 
     private final TelegramBot telegramBot;
 
+    private final EncryptionService encryptionService;
+
     public void notifyUser(EmailMessageDTO[] newMessages, UserEmailJpaEntity userEmailJpaEntity) {
         Arrays.stream(newMessages).forEach(message -> {
             try {
@@ -41,7 +45,7 @@ public class NotificationService {
 
                 String messageLink = getMessageLink(message.getUid(), userEmailJpaEntity.getId());
                 sendNotification(userEmailJpaEntity.getUser().getChatId(), notificationText, messageLink);
-            } catch (MessagingException e) {
+            } catch (RuntimeException | MessagingException e) {
                 log.error("Ошибка при формировании уведомления: {}", e.getMessage());
             }
         });
@@ -76,15 +80,20 @@ public class NotificationService {
             FlexmarkHtmlConverter converter = FlexmarkHtmlConverter.builder().build();
             return converter.convert(content);
         } else {
-            return  text.substring(0, MAX_SNIPPET_LENGTH) + "...";
+            return text.substring(0, MAX_SNIPPET_LENGTH) + "...";
         }
     }
 
     private String getMessageLink(Long uid, Long userEmailEntityId) {
-        String userEmailId = "userEmailId=" + userEmailEntityId;
-        String messageUID = "messageUID=" + uid;
+        try {
+            String userEmailId = "encodedUserEmailId=" + encryptionService.encodeId(userEmailEntityId);
+            String messageUID = "encodedMessageUID=" + encryptionService.encodeId(uid);
 
-        return messagesProperties.getUrl() + "?" + userEmailId + "&" + messageUID;
+            return messagesProperties.getUrl() + "?" + userEmailId + "&" + messageUID;
+        } catch (EncryptionException e) {
+            log.error("Ошибка при формировании ссылки: {}", e.getMessage());
+            throw new RuntimeException("Error generating message link", e);
+        }
     }
 
     private void sendNotification(Long chatId, String notificationText, String messageLink) {

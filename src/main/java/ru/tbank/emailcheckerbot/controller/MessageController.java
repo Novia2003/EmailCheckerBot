@@ -28,7 +28,7 @@ public class MessageController {
 
     @GetMapping
     @Operation(
-            description = "Getting the full content of an email message by its UID"
+            description = "Getting the full content of an email message by its id"
     )
     @ApiResponses(
             value = {
@@ -67,11 +67,11 @@ public class MessageController {
             }
     )
     public String getClients(
-            @RequestParam Long userEmailId,
-            @RequestParam Long messageUID,
+            @RequestParam String encodedUserEmailId,
+            @RequestParam String encodedMessageUID,
             Model model
     ) {
-        String content = emailUIDService.getMessageByUID(userEmailId, messageUID);
+        String content = emailUIDService.getMessageByUID(encodedUserEmailId, encodedMessageUID);
         model.addAttribute("content", content);
         return "message";
     }
