@@ -25,16 +25,67 @@ public class MessageControllerTest {
     private EmailUIDService emailUIDService;
 
     @Test
-    public void testGetClients() throws Exception {
-        long userEmailId = 1L;
-        long messageUID = 100L;
+    public void testGetClients_shouldReturnMessageContentWhenValid() throws Exception {
+        String encodedUserEmailId = "encodedUserEmailId";
+        String encodedMessageUID = "encodedMessageUID";
         String expectedContent = "Все будет хорошо";
 
-        when(emailUIDService.getMessageByUID(userEmailId, messageUID)).thenReturn(expectedContent);
+        when(emailUIDService.getMessageByUID(encodedUserEmailId, encodedMessageUID)).thenReturn(expectedContent);
 
         mockMvc.perform(get("/api/v1/messages")
-                        .param("userEmailId", Long.toString(userEmailId))
-                        .param("messageUID", Long.toString(messageUID))
+                        .param("encodedUserEmailId", encodedUserEmailId)
+                        .param("encodedMessageUID", encodedMessageUID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(view().name("message"))
+                .andExpect(content().string(containsString(expectedContent)));
+    }
+
+    @Test
+    public void testGetClients_shouldReturnErrorMessageWhenDecryptionFails() throws Exception {
+        String encodedUserEmailId = "encodedUserEmailId";
+        String encodedMessageUID = "encodedMessageUID";
+        String expectedContent = "Произошла ошибка при расшифровании входных параметров";
+
+        when(emailUIDService.getMessageByUID(encodedUserEmailId, encodedMessageUID)).thenReturn(expectedContent);
+
+        mockMvc.perform(get("/api/v1/messages")
+                        .param("encodedUserEmailId", encodedUserEmailId)
+                        .param("encodedMessageUID", encodedMessageUID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(view().name("message"))
+                .andExpect(content().string(containsString(expectedContent)));
+    }
+
+    @Test
+    public void testGetClients_shouldReturnErrorMessageWhenUserEmailNotFound() throws Exception {
+        String encodedUserEmailId = "encodedUserEmailId";
+        String encodedMessageUID = "encodedMessageUID";
+        String expectedContent = "Запись о почте с encodedUserEmailId " + encodedUserEmailId + " не найдена";
+
+        when(emailUIDService.getMessageByUID(encodedUserEmailId, encodedMessageUID)).thenReturn(expectedContent);
+
+        mockMvc.perform(get("/api/v1/messages")
+                        .param("encodedUserEmailId", encodedUserEmailId)
+                        .param("encodedMessageUID", encodedMessageUID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(view().name("message"))
+                .andExpect(content().string(containsString(expectedContent)));
+    }
+
+    @Test
+    public void testGetClients_shouldReturnErrorMessageWhenMessageNotFound() throws Exception {
+        String encodedUserEmailId = "encodedUserEmailId";
+        String encodedMessageUID = "encodedMessageUID";
+        String expectedContent = "Сообщение с encodeMessageUID " + encodedMessageUID + "не найдено";
+
+        when(emailUIDService.getMessageByUID(encodedUserEmailId, encodedMessageUID)).thenReturn(expectedContent);
+
+        mockMvc.perform(get("/api/v1/messages")
+                        .param("encodedUserEmailId", encodedUserEmailId)
+                        .param("encodedMessageUID", encodedMessageUID)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(view().name("message"))

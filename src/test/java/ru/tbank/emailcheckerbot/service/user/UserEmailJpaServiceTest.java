@@ -208,15 +208,24 @@ class UserEmailJpaServiceTest {
     }
 
     @Test
-    void getUserEmail_shouldReturnUserEmail() {
+    void getUserEmailJpaEntity_shouldReturnUserEmail() {
         Long id = 1L;
         UserEmailJpaEntity userEmailJpaEntity = new UserEmailJpaEntity();
 
-        when(userEmailJpaRepository.getReferenceById(id)).thenReturn(userEmailJpaEntity);
+        when(userEmailJpaRepository.findById(id)).thenReturn(Optional.of(userEmailJpaEntity));
 
-        UserEmailJpaEntity result = userEmailJpaService.getUserEmail(id);
+        UserEmailJpaEntity result = userEmailJpaService.getUserEmailJpaEntity(id);
 
         assertEquals(userEmailJpaEntity, result);
+    }
+
+    @Test
+    void getUserEmailJpaEntity_shouldThrowException() {
+        Long id = 1L;
+
+        when(userEmailJpaRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(UserEmailJpaEntityNotFoundException.class, () -> userEmailJpaService.getUserEmailJpaEntity(id));
     }
 
     @Test

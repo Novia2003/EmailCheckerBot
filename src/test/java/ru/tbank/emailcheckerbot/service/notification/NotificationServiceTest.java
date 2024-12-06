@@ -15,16 +15,13 @@ import ru.tbank.emailcheckerbot.dto.message.EmailMessageDTO;
 import ru.tbank.emailcheckerbot.dto.type.MailProvider;
 import ru.tbank.emailcheckerbot.entity.jpa.UserEmailJpaEntity;
 import ru.tbank.emailcheckerbot.entity.jpa.UserJpaEntity;
+import ru.tbank.emailcheckerbot.service.encryption.EncryptionService;
 
 import java.time.Instant;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
@@ -34,6 +31,9 @@ class NotificationServiceTest {
 
     @Mock
     private TelegramBot telegramBot;
+
+    @Mock
+    private EncryptionService encryptionService;
 
     @InjectMocks
     private NotificationService notificationService;
@@ -121,6 +121,7 @@ class NotificationServiceTest {
         UserEmailJpaEntity userEmailJpaEntity = createUserEmailJpaEntity();
 
         when(messagesProperties.getUrl()).thenReturn("http://127.0.0.1:8080/api/v1/messages");
+        when(encryptionService.encodeId(anyLong())).thenReturn("encodedId");
 
         notificationService.notifyUser(new EmailMessageDTO[]{message}, userEmailJpaEntity);
 
@@ -131,7 +132,10 @@ class NotificationServiceTest {
         InlineKeyboardMarkup markup = (InlineKeyboardMarkup) sendMessage.getReplyMarkup();
         List<List<InlineKeyboardButton>> keyboard = markup.getKeyboard();
         InlineKeyboardButton button = keyboard.get(0).get(0);
-        assertEquals("http://127.0.0.1:8080/api/v1/messages?userEmailId=1&messageUID=1", button.getUrl());
+        assertEquals(
+                "http://127.0.0.1:8080/api/v1/messages?encodedUserEmailId=encodedId&encodedMessageUID=encodedId",
+                button.getUrl()
+        );
     }
 
 
