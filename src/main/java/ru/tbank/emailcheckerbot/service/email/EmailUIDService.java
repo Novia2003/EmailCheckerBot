@@ -58,7 +58,7 @@ public class EmailUIDService {
                 userEmail.getMailProvider().getConfigurationName()
         );
 
-        if (Instant.now().isAfter(userEmail.getEndAccessTokenLife())) {
+        if (Instant.now().isAfter(userEmail.getAccessTokenEnded())) {
             authenticationService.refreshToken(userEmail.getId(), true);
         }
 

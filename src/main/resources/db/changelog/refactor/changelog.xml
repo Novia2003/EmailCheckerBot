@@ -4,8 +4,11 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
-    <include file="init/changelog.xml" relativeToChangelogFile="true"/>
-    <include file="security/changelog.xml" relativeToChangelogFile="true"/>
-    <include file="provider/changelog.xml" relativeToChangelogFile="true"/>
-    <include file="refactor/changelog.xml" relativeToChangelogFile="true"/>
+    <changeSet id="refactor" author="Slava">
+        <sqlFile
+                path="sql/add_not_null_constraints_and_rename_field.sql"
+                dbms="postgresql"
+                relativeToChangelogFile="true"
+        />
+    </changeSet>
 </databaseChangeLog>

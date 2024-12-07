@@ -21,11 +21,11 @@ public class UserEmailRedisEntity {
 
     private String email;
 
-    private String accessToken;
+    private byte[] accessToken;
 
-    private String refreshToken;
+    private byte[] refreshToken;
 
-    private Instant endAccessTokenLife;
+    private Instant accessTokenEnded;
 
     private Long lastMessageUID;
 }

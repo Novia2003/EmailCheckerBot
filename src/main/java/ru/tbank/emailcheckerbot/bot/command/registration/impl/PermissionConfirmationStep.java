@@ -11,6 +11,7 @@ import ru.tbank.emailcheckerbot.exeption.EmailAccessException;
 import ru.tbank.emailcheckerbot.exeption.UserEmailRedisEntityNotFoundException;
 import ru.tbank.emailcheckerbot.service.authentication.AuthenticationService;
 import ru.tbank.emailcheckerbot.service.email.EmailUIDService;
+import ru.tbank.emailcheckerbot.service.encryption.EncryptionService;
 import ru.tbank.emailcheckerbot.service.user.UserEmailRedisService;
 
 import java.time.Instant;
@@ -24,6 +25,7 @@ public class PermissionConfirmationStep implements EmailRegistrationStep {
     private final UserEmailRedisService userEmailRedisService;
     private final AuthenticationService authenticationService;
     private final EmailUIDService emailUIDService;
+    private final EncryptionService encryptionService;
 
     @Override
     public SendMessage execute(Update update) {
@@ -43,7 +45,7 @@ public class PermissionConfirmationStep implements EmailRegistrationStep {
                 lastMessageUID = emailUIDService.getLastMessageUID(
                         userEmailRedisEntity.getEmail(),
                         userEmailRedisEntity.getMailProvider(),
-                        userEmailRedisEntity.getAccessToken()
+                        encryptionService.decryptToken(userEmailRedisEntity.getAccessToken())
                 );
             } catch (EmailAccessException e) {
                 return getFailedPermissionConfirmationMessage(chatId, e.getMessage());

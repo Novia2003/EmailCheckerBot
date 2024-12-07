@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.tbank.emailcheckerbot.dto.type.MailProvider;
+import ru.tbank.emailcheckerbot.repository.converter.TokenConverter;
 
 import java.time.Instant;
 
@@ -33,13 +34,17 @@ public class UserEmailJpaEntity {
 
     @NotNull
     @Column(name = "access_token")
+    @Convert(converter = TokenConverter.class)
     private String accessToken;
 
+    @NotNull
     @Column(name = "refresh_token")
+    @Convert(converter = TokenConverter.class)
     private String refreshToken;
 
-    @Column(name = "end_access_token_life")
-    private Instant endAccessTokenLife;
+    @NotNull
+    @Column(name = "access_token_ended")
+    private Instant accessTokenEnded;
 
     @NotNull
     @Column(name = "last_message_uid")
