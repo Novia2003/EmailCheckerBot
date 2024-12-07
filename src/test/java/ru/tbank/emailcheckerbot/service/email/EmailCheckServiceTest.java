@@ -62,7 +62,7 @@ class EmailCheckServiceTest {
         userEmailJpaEntity.setEmail("slavik@mail.ru");
         userEmailJpaEntity.setAccessToken("accessToken");
         userEmailJpaEntity.setMailProvider(MailProvider.YANDEX);
-        userEmailJpaEntity.setEndAccessTokenLife(Instant.now().minusSeconds(3600));
+        userEmailJpaEntity.setAccessTokenEnded(Instant.now().minusSeconds(3600));
         userEmailJpaEntity.setLastMessageUID(100L);
 
         Properties properties = new Properties();
@@ -94,7 +94,7 @@ class EmailCheckServiceTest {
         userEmailJpaEntity.setEmail("test@example.com");
         userEmailJpaEntity.setAccessToken("accessToken");
         userEmailJpaEntity.setMailProvider(MailProvider.YANDEX);
-        userEmailJpaEntity.setEndAccessTokenLife(Instant.now().plusSeconds(3600));
+        userEmailJpaEntity.setAccessTokenEnded(Instant.now().plusSeconds(3600));
         userEmailJpaEntity.setLastMessageUID(100L);
 
         Properties properties = new Properties();
@@ -126,7 +126,7 @@ class EmailCheckServiceTest {
         userEmailJpaEntity.setEmail("test@example.com");
         userEmailJpaEntity.setAccessToken("accessToken");
         userEmailJpaEntity.setMailProvider(MailProvider.YANDEX);
-        userEmailJpaEntity.setEndAccessTokenLife(Instant.now().plusSeconds(3600));
+        userEmailJpaEntity.setAccessTokenEnded(Instant.now().plusSeconds(3600));
         userEmailJpaEntity.setLastMessageUID(100L);
 
         Properties properties = new Properties();

@@ -159,7 +159,7 @@ class NotificationServiceTest {
         entity.setEmail("slavik@mail.com");
         entity.setAccessToken("accessToken");
         entity.setMailProvider(MailProvider.YANDEX);
-        entity.setEndAccessTokenLife(Instant.now().plusSeconds(3600));
+        entity.setAccessTokenEnded(Instant.now().plusSeconds(3600));
         entity.setLastMessageUID(100L);
         entity.setUser(user);
         return entity;

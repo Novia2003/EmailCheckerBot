@@ -18,6 +18,7 @@ import ru.tbank.emailcheckerbot.exeption.EmailAccessException;
 import ru.tbank.emailcheckerbot.exeption.UserEmailRedisEntityNotFoundException;
 import ru.tbank.emailcheckerbot.service.authentication.AuthenticationService;
 import ru.tbank.emailcheckerbot.service.email.EmailUIDService;
+import ru.tbank.emailcheckerbot.service.encryption.EncryptionService;
 import ru.tbank.emailcheckerbot.service.user.UserEmailRedisService;
 
 import java.time.Instant;
@@ -38,6 +39,9 @@ class PermissionConfirmationStepTest {
     @Mock
     private EmailUIDService emailUIDService;
 
+    @Mock
+    private EncryptionService encryptionService;
+
     @InjectMocks
     private PermissionConfirmationStep permissionConfirmationStep;
 
@@ -57,15 +61,17 @@ class PermissionConfirmationStepTest {
 
         UserEmailRedisEntity userEmailRedisEntity = new UserEmailRedisEntity();
         userEmailRedisEntity.setEmail("test@example.com");
-        userEmailRedisEntity.setAccessToken("accessToken");
+        userEmailRedisEntity.setAccessToken(new byte[]{});
         userEmailRedisEntity.setMailProvider(MailProvider.YANDEX);
+        String token = "token";
 
         when(userEmailRedisService.getEndAccessTokenLife(user.getId())).thenReturn(Instant.now().minusSeconds(3600));
         when(userEmailRedisService.getUserEmailRedisEntity(user.getId())).thenReturn(userEmailRedisEntity);
+        when(encryptionService.decryptToken(userEmailRedisEntity.getAccessToken())).thenReturn(token);
         when(emailUIDService.getLastMessageUID(
                 userEmailRedisEntity.getEmail(),
                 userEmailRedisEntity.getMailProvider(),
-                userEmailRedisEntity.getAccessToken()
+                token
         )).thenReturn(100L);
 
         SendMessage result = permissionConfirmationStep.execute(update);

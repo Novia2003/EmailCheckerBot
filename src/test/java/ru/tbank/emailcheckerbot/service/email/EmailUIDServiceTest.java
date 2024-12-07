@@ -73,7 +73,7 @@ class EmailUIDServiceTest {
         userEmail.setEmail("slavik@mail.ru");
         userEmail.setAccessToken("accessToken");
         userEmail.setMailProvider(MailProvider.YANDEX);
-        userEmail.setEndAccessTokenLife(Instant.now().plusSeconds(3600));
+        userEmail.setAccessTokenEnded(Instant.now().plusSeconds(3600));
         Properties properties = new Properties();
         EmailMessageDTO emailMessageDTO = new EmailMessageDTO(
                 100L,
@@ -121,7 +121,7 @@ class EmailUIDServiceTest {
         userEmail.setEmail("slavik@mail.ru");
         userEmail.setAccessToken("accessToken");
         userEmail.setMailProvider(MailProvider.YANDEX);
-        userEmail.setEndAccessTokenLife(Instant.now().minusSeconds(3600));
+        userEmail.setAccessTokenEnded(Instant.now().minusSeconds(3600));
         Properties properties = new Properties();
         EmailMessageDTO emailMessageDTO = new EmailMessageDTO(
                 100L,
@@ -211,7 +211,7 @@ class EmailUIDServiceTest {
         userEmail.setEmail("slavik@mail.ru");
         userEmail.setAccessToken("accessToken");
         userEmail.setMailProvider(MailProvider.YANDEX);
-        userEmail.setEndAccessTokenLife(Instant.now().plusSeconds(3600));
+        userEmail.setAccessTokenEnded(Instant.now().plusSeconds(3600));
         Properties properties = new Properties();
 
         when(encryptionService.decodeId(encodedUserEmailId)).thenReturn(userEmailId);
