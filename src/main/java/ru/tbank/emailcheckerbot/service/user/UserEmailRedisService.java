@@ -8,6 +8,7 @@ import ru.tbank.emailcheckerbot.dto.type.MailProvider;
 import ru.tbank.emailcheckerbot.entity.redis.UserEmailRedisEntity;
 import ru.tbank.emailcheckerbot.exeption.UserEmailRedisEntityNotFoundException;
 import ru.tbank.emailcheckerbot.repository.redis.UserEmailRedisRepository;
+import ru.tbank.emailcheckerbot.service.encryption.EncryptionService;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -21,6 +22,7 @@ public class UserEmailRedisService {
     private final UserEmailRedisRepository userEmailRedisRepository;
 
     private final UserEmailJpaService userEmailJpaService;
+    private final EncryptionService encryptionService;
 
     public void createUserEmailRedisEntity(Long userId, Long chatId) {
         UserEmailRedisEntity userEmailRedisEntity = new UserEmailRedisEntity();
@@ -38,9 +40,9 @@ public class UserEmailRedisService {
     ) {
         UserEmailRedisEntity userEmailRedisEntity = getUserEmailRedisEntity(userId);
 
-        userEmailRedisEntity.setAccessToken(dto.getAccessToken());
-        userEmailRedisEntity.setRefreshToken(dto.getRefreshToken());
-        userEmailRedisEntity.setEndAccessTokenLife(calculateEndAccessTokenLife(dto.getExpiresIn()));
+        userEmailRedisEntity.setAccessToken(encryptionService.encryptToken(dto.getAccessToken()));
+        userEmailRedisEntity.setRefreshToken(encryptionService.encryptToken(dto.getRefreshToken()));
+        userEmailRedisEntity.setAccessTokenEnded(calculateEndAccessTokenLife(dto.getExpiresIn()));
         userEmailRedisEntity.setMailProvider(mailProvider);
         userEmailRedisEntity.setEmail(email);
 
@@ -50,11 +52,11 @@ public class UserEmailRedisService {
     public void saveRefreshTokenResponse(Long id, RefreshTokenResponseDTO dto) {
         UserEmailRedisEntity userEmailRedisEntity = getUserEmailRedisEntity(id);
 
-        userEmailRedisEntity.setAccessToken(dto.getAccessToken());
-        userEmailRedisEntity.setEndAccessTokenLife(calculateEndAccessTokenLife(dto.getExpiresIn()));
+        userEmailRedisEntity.setAccessToken(encryptionService.encryptToken(dto.getAccessToken()));
+        userEmailRedisEntity.setAccessTokenEnded(calculateEndAccessTokenLife(dto.getExpiresIn()));
 
         if (userEmailRedisEntity.getMailProvider() == MailProvider.YANDEX) {
-            userEmailRedisEntity.setRefreshToken(dto.getRefreshToken());
+            userEmailRedisEntity.setRefreshToken(encryptionService.encryptToken(dto.getRefreshToken()));
         }
 
         userEmailRedisRepository.save(userEmailRedisEntity);
@@ -72,11 +74,11 @@ public class UserEmailRedisService {
     }
 
     public String getAccessToken(Long userId) {
-        return getUserEmailRedisEntity(userId).getAccessToken();
+        return encryptionService.decryptToken(getUserEmailRedisEntity(userId).getAccessToken());
     }
 
     public String getRefreshToken(Long userId) {
-        return getUserEmailRedisEntity(userId).getRefreshToken();
+        return encryptionService.decryptToken(getUserEmailRedisEntity(userId).getRefreshToken());
     }
 
     public MailProvider getMailProvider(Long userId) {
@@ -84,7 +86,7 @@ public class UserEmailRedisService {
     }
 
     public Instant getEndAccessTokenLife(Long userId) {
-        return getUserEmailRedisEntity(userId).getEndAccessTokenLife();
+        return getUserEmailRedisEntity(userId).getAccessTokenEnded();
     }
 
     public UserEmailRedisEntity getUserEmailRedisEntity(Long userId) {

@@ -5,7 +5,6 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import ru.tbank.emailcheckerbot.dto.type.MailProvider;
-import ru.tbank.emailcheckerbot.bot.command.registration.RegistrationStep;
 
 import java.time.Instant;
 
@@ -22,13 +21,11 @@ public class UserEmailRedisEntity {
 
     private String email;
 
-    private String accessToken;
+    private byte[] accessToken;
 
-    private String refreshToken;
+    private byte[] refreshToken;
 
-    private Instant endAccessTokenLife;
+    private Instant accessTokenEnded;
 
     private Long lastMessageUID;
-
-    private RegistrationStep registrationStep;
 }

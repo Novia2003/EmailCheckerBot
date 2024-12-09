@@ -14,6 +14,7 @@ import ru.tbank.emailcheckerbot.entity.redis.UserEmailRedisEntity;
 import ru.tbank.emailcheckerbot.exeption.UserEmailJpaEntityNotFoundException;
 import ru.tbank.emailcheckerbot.repository.jpa.UserEmailJpaRepository;
 import ru.tbank.emailcheckerbot.repository.jpa.UserJpaRepository;
+import ru.tbank.emailcheckerbot.service.encryption.EncryptionService;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -31,6 +32,9 @@ class UserEmailJpaServiceTest {
 
     @Mock
     private UserEmailJpaRepository userEmailJpaRepository;
+
+    @Mock
+    private EncryptionService encryptionService;
 
     @InjectMocks
     private UserEmailJpaService userEmailJpaService;
@@ -56,7 +60,7 @@ class UserEmailJpaServiceTest {
         UserEmailJpaEntity capturedEntity = captor.getValue();
         assertEquals("6c3c7dcebeba73ba878439237b8cdc302031313737363830", capturedEntity.getAccessToken());
         assertEquals("b42019a80b7d76b388b504cc4366e98425fcbd3e37363830", capturedEntity.getRefreshToken());
-        assertNotNull(capturedEntity.getEndAccessTokenLife());
+        assertNotNull(capturedEntity.getAccessTokenEnded());
     }
 
     @Test
@@ -110,12 +114,16 @@ class UserEmailJpaServiceTest {
         redisEntity.setChatId(12345L);
         redisEntity.setMailProvider(MailProvider.YANDEX);
         redisEntity.setEmail("slavik@mail.ru");
-        redisEntity.setAccessToken("6c3c7dcebeba73ba878439237b8cdc302031313737363830");
-        redisEntity.setRefreshToken("b42019a80b7d76b388b504cc4366e98425fcbd3e37363830");
-        redisEntity.setEndAccessTokenLife(Instant.now());
+        redisEntity.setAccessToken(new byte[]{1});
+        redisEntity.setRefreshToken(new byte[]{2});
+        redisEntity.setAccessTokenEnded(Instant.now());
         redisEntity.setLastMessageUID(100L);
+        String accessToken = "accessToken";
+        String refreshToken = "refreshToken";
 
         when(userJpaRepository.existsByTelegramId(1L)).thenReturn(false);
+        when(encryptionService.decryptToken(redisEntity.getAccessToken())).thenReturn(accessToken);
+        when(encryptionService.decryptToken(redisEntity.getRefreshToken())).thenReturn(refreshToken);
 
         userEmailJpaService.saveEntityFromRedis(redisEntity);
 
@@ -132,8 +140,8 @@ class UserEmailJpaServiceTest {
         UserEmailJpaEntity capturedEmail = emailCaptor.getValue();
         assertEquals(MailProvider.YANDEX, capturedEmail.getMailProvider());
         assertEquals("slavik@mail.ru", capturedEmail.getEmail());
-        assertEquals("6c3c7dcebeba73ba878439237b8cdc302031313737363830", capturedEmail.getAccessToken());
-        assertEquals("b42019a80b7d76b388b504cc4366e98425fcbd3e37363830", capturedEmail.getRefreshToken());
+        assertEquals(accessToken, capturedEmail.getAccessToken());
+        assertEquals(refreshToken, capturedEmail.getRefreshToken());
         assertEquals(100L, capturedEmail.getLastMessageUID());
     }
 
@@ -144,10 +152,12 @@ class UserEmailJpaServiceTest {
         redisEntity.setChatId(12345L);
         redisEntity.setMailProvider(MailProvider.YANDEX);
         redisEntity.setEmail("slavik@mail.ru");
-        redisEntity.setAccessToken("6c3c7dcebeba73ba878439237b8cdc302031313737363830");
-        redisEntity.setRefreshToken("b42019a80b7d76b388b504cc4366e98425fcbd3e37363830");
-        redisEntity.setEndAccessTokenLife(Instant.now());
+        redisEntity.setAccessToken(new byte[]{1});
+        redisEntity.setRefreshToken(new byte[]{2});
+        redisEntity.setAccessTokenEnded(Instant.now());
         redisEntity.setLastMessageUID(100L);
+        String accessToken = "accessToken";
+        String refreshToken = "refreshToken";
 
         UserJpaEntity existingUser = new UserJpaEntity();
         existingUser.setTelegramId(1L);
@@ -155,6 +165,9 @@ class UserEmailJpaServiceTest {
 
         when(userJpaRepository.existsByTelegramId(1L)).thenReturn(true);
         when(userJpaRepository.getByTelegramId(1L)).thenReturn(existingUser);
+        when(encryptionService.decryptToken(redisEntity.getAccessToken())).thenReturn(accessToken);
+        when(encryptionService.decryptToken(redisEntity.getRefreshToken())).thenReturn(refreshToken);
+
 
         userEmailJpaService.saveEntityFromRedis(redisEntity);
 
@@ -164,8 +177,8 @@ class UserEmailJpaServiceTest {
         UserEmailJpaEntity capturedEmail = emailCaptor.getValue();
         assertEquals(MailProvider.YANDEX, capturedEmail.getMailProvider());
         assertEquals("slavik@mail.ru", capturedEmail.getEmail());
-        assertEquals("6c3c7dcebeba73ba878439237b8cdc302031313737363830", capturedEmail.getAccessToken());
-        assertEquals("b42019a80b7d76b388b504cc4366e98425fcbd3e37363830", capturedEmail.getRefreshToken());
+        assertEquals(accessToken, capturedEmail.getAccessToken());
+        assertEquals(refreshToken, capturedEmail.getRefreshToken());
         assertEquals(100L, capturedEmail.getLastMessageUID());
     }
 
@@ -208,15 +221,24 @@ class UserEmailJpaServiceTest {
     }
 
     @Test
-    void getUserEmail_shouldReturnUserEmail() {
+    void getUserEmailJpaEntity_shouldReturnUserEmail() {
         Long id = 1L;
         UserEmailJpaEntity userEmailJpaEntity = new UserEmailJpaEntity();
 
-        when(userEmailJpaRepository.getReferenceById(id)).thenReturn(userEmailJpaEntity);
+        when(userEmailJpaRepository.findById(id)).thenReturn(Optional.of(userEmailJpaEntity));
 
-        UserEmailJpaEntity result = userEmailJpaService.getUserEmail(id);
+        UserEmailJpaEntity result = userEmailJpaService.getUserEmailJpaEntity(id);
 
         assertEquals(userEmailJpaEntity, result);
+    }
+
+    @Test
+    void getUserEmailJpaEntity_shouldThrowException() {
+        Long id = 1L;
+
+        when(userEmailJpaRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(UserEmailJpaEntityNotFoundException.class, () -> userEmailJpaService.getUserEmailJpaEntity(id));
     }
 
     @Test

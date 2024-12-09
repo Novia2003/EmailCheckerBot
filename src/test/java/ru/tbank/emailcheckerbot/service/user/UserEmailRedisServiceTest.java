@@ -12,6 +12,7 @@ import ru.tbank.emailcheckerbot.dto.type.MailProvider;
 import ru.tbank.emailcheckerbot.entity.redis.UserEmailRedisEntity;
 import ru.tbank.emailcheckerbot.exeption.UserEmailRedisEntityNotFoundException;
 import ru.tbank.emailcheckerbot.repository.redis.UserEmailRedisRepository;
+import ru.tbank.emailcheckerbot.service.encryption.EncryptionService;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -27,6 +28,9 @@ class UserEmailRedisServiceTest {
 
     @Mock
     private UserEmailJpaService userEmailJpaService;
+
+    @Mock
+    private EncryptionService encryptionService;
 
     @InjectMocks
     private UserEmailRedisService userEmailRedisService;
@@ -55,9 +59,13 @@ class UserEmailRedisServiceTest {
         dto.setExpiresIn(3600L);
         MailProvider mailProvider = MailProvider.YANDEX;
         String email = "slavik@mail.ru";
+        byte[] accessTokenByreArray = new byte[]{};
+        byte[] refreshTokenByreArray = new byte[]{};
 
         UserEmailRedisEntity userEmailRedisEntity = new UserEmailRedisEntity();
         when(userEmailRedisRepository.findById(userId)).thenReturn(Optional.of(userEmailRedisEntity));
+        when(encryptionService.encryptToken(dto.getAccessToken())).thenReturn(accessTokenByreArray);
+        when(encryptionService.encryptToken(dto.getRefreshToken())).thenReturn(refreshTokenByreArray);
 
         userEmailRedisService.saveAccessTokenResponseAndEmail(userId, dto, mailProvider, email);
 
@@ -65,11 +73,11 @@ class UserEmailRedisServiceTest {
         verify(userEmailRedisRepository).save(captor.capture());
 
         UserEmailRedisEntity capturedEntity = captor.getValue();
-        assertEquals("6c3c7dcebeba73ba878439237b8cdc302031313737363830", capturedEntity.getAccessToken());
-        assertEquals("b42019a80b7d76b388b504cc4366e98425fcbd3e37363830", capturedEntity.getRefreshToken());
+        assertEquals(accessTokenByreArray, capturedEntity.getAccessToken());
+        assertEquals(refreshTokenByreArray, capturedEntity.getRefreshToken());
         assertEquals(mailProvider, capturedEntity.getMailProvider());
         assertEquals(email, capturedEntity.getEmail());
-        assertNotNull(capturedEntity.getEndAccessTokenLife());
+        assertNotNull(capturedEntity.getAccessTokenEnded());
     }
 
     @Test
@@ -79,6 +87,10 @@ class UserEmailRedisServiceTest {
         dto.setAccessToken("6c3c7dcebeba73ba878439237b8cdc302031313737363830");
         dto.setRefreshToken("b42019a80b7d76b388b504cc4366e98425fcbd3e37363830");
         dto.setExpiresIn(3600L);
+        byte[] accessTokenByreArray = new byte[]{};
+        byte[] refreshTokenByreArray = new byte[]{};
+        when(encryptionService.encryptToken(dto.getAccessToken())).thenReturn(accessTokenByreArray);
+        when(encryptionService.encryptToken(dto.getRefreshToken())).thenReturn(refreshTokenByreArray);
 
         UserEmailRedisEntity userEmailRedisEntity = new UserEmailRedisEntity();
         userEmailRedisEntity.setMailProvider(MailProvider.YANDEX);
@@ -91,9 +103,9 @@ class UserEmailRedisServiceTest {
         verify(userEmailRedisRepository).save(captor.capture());
 
         UserEmailRedisEntity capturedEntity = captor.getValue();
-        assertEquals("6c3c7dcebeba73ba878439237b8cdc302031313737363830", capturedEntity.getAccessToken());
-        assertEquals("b42019a80b7d76b388b504cc4366e98425fcbd3e37363830", capturedEntity.getRefreshToken());
-        assertNotNull(capturedEntity.getEndAccessTokenLife());
+        assertEquals(accessTokenByreArray, capturedEntity.getAccessToken());
+        assertEquals(refreshTokenByreArray, capturedEntity.getRefreshToken());
+        assertNotNull(capturedEntity.getAccessTokenEnded());
     }
 
     @Test
@@ -123,13 +135,15 @@ class UserEmailRedisServiceTest {
     void getAccessToken_shouldReturnAccessToken() {
         Long userId = 1L;
         UserEmailRedisEntity userEmailRedisEntity = new UserEmailRedisEntity();
-        userEmailRedisEntity.setAccessToken("6c3c7dcebeba73ba878439237b8cdc302031313737363830");
+        userEmailRedisEntity.setAccessToken(new byte[]{});
+        String accessToken = "accessToken";
 
         when(userEmailRedisRepository.findById(userId)).thenReturn(Optional.of(userEmailRedisEntity));
+        when(encryptionService.decryptToken(userEmailRedisEntity.getAccessToken())).thenReturn(accessToken);
 
         String result = userEmailRedisService.getAccessToken(userId);
 
-        assertEquals("6c3c7dcebeba73ba878439237b8cdc302031313737363830", result);
+        assertEquals(accessToken, result);
     }
 
     @Test
@@ -145,13 +159,15 @@ class UserEmailRedisServiceTest {
     void getRefreshToken_shouldReturnRefreshToken() {
         Long userId = 1L;
         UserEmailRedisEntity userEmailRedisEntity = new UserEmailRedisEntity();
-        userEmailRedisEntity.setRefreshToken("b42019a80b7d76b388b504cc4366e98425fcbd3e37363830");
+        userEmailRedisEntity.setRefreshToken(new byte[]{});
+        String refreshToken = "refreshToken";
 
         when(userEmailRedisRepository.findById(userId)).thenReturn(Optional.of(userEmailRedisEntity));
+        when(encryptionService.decryptToken(userEmailRedisEntity.getRefreshToken())).thenReturn(refreshToken);
 
         String result = userEmailRedisService.getRefreshToken(userId);
 
-        assertEquals("b42019a80b7d76b388b504cc4366e98425fcbd3e37363830", result);
+        assertEquals(refreshToken, result);
     }
 
     @Test
@@ -189,13 +205,13 @@ class UserEmailRedisServiceTest {
     void getEndAccessTokenLife_shouldReturnEndAccessTokenLife() {
         Long userId = 1L;
         UserEmailRedisEntity userEmailRedisEntity = new UserEmailRedisEntity();
-        userEmailRedisEntity.setEndAccessTokenLife(Instant.now());
+        userEmailRedisEntity.setAccessTokenEnded(Instant.now());
 
         when(userEmailRedisRepository.findById(userId)).thenReturn(Optional.of(userEmailRedisEntity));
 
         Instant result = userEmailRedisService.getEndAccessTokenLife(userId);
 
-        assertEquals(userEmailRedisEntity.getEndAccessTokenLife(), result);
+        assertEquals(userEmailRedisEntity.getAccessTokenEnded(), result);
     }
 
     @Test

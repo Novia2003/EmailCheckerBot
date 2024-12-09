@@ -3,6 +3,7 @@ package ru.tbank.emailcheckerbot.service.email;
 import org.springframework.stereotype.Service;
 import ru.tbank.emailcheckerbot.exeption.EmailAccessException;
 import ru.tbank.emailcheckerbot.dto.message.EmailMessageDTO;
+import ru.tbank.emailcheckerbot.exeption.MessageNotFoundException;
 
 import javax.mail.AuthenticationFailedException;
 import javax.mail.Flags;
@@ -66,6 +67,11 @@ public class EmailSessionService {
 
             UIDFolder uidFolder = (UIDFolder) folder;
             Message message = uidFolder.getMessageByUID(messageUID);
+
+            if (message == null) {
+                throw new MessageNotFoundException("Message with UID " + messageUID + " not found");
+            }
+
             message.setFlags(new Flags(Flags.Flag.SEEN), true);
             emailMessageDTO = EmailMessageDTO.of(messageUID, message);
 

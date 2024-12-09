@@ -44,7 +44,7 @@ public class EmailCheckService {
                 userEmailJpaEntity.getMailProvider().getConfigurationName()
         );
 
-        if (Instant.now().isAfter(userEmailJpaEntity.getEndAccessTokenLife())) {
+        if (Instant.now().isAfter(userEmailJpaEntity.getAccessTokenEnded())) {
             log.info("Access token expired for user: {}. Refreshing token...", userEmailJpaEntity.getEmail());
             authenticationService.refreshToken(userEmailJpaEntity.getId(), true);
         }

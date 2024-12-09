@@ -10,6 +10,7 @@ import ru.tbank.emailcheckerbot.entity.redis.UserEmailRedisEntity;
 import ru.tbank.emailcheckerbot.exeption.UserEmailJpaEntityNotFoundException;
 import ru.tbank.emailcheckerbot.repository.jpa.UserEmailJpaRepository;
 import ru.tbank.emailcheckerbot.repository.jpa.UserJpaRepository;
+import ru.tbank.emailcheckerbot.service.encryption.EncryptionService;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -24,11 +25,13 @@ public class UserEmailJpaService {
     private final UserJpaRepository userJpaRepository;
     private final UserEmailJpaRepository userEmailJpaRepository;
 
+    private final EncryptionService encryptionService;
+
     public void saveRefreshTokenResponse(Long id, RefreshTokenResponseDTO dto) {
         UserEmailJpaEntity userEmailJpaEntity = getUserEmailJpaEntity(id);
 
         userEmailJpaEntity.setAccessToken(dto.getAccessToken());
-        userEmailJpaEntity.setEndAccessTokenLife(calculateEndAccessTokenLife(dto.getExpiresIn()));
+        userEmailJpaEntity.setAccessTokenEnded(calculateEndAccessTokenLife(dto.getExpiresIn()));
 
         if (userEmailJpaEntity.getMailProvider() == MailProvider.YANDEX) {
             userEmailJpaEntity.setRefreshToken(dto.getRefreshToken());
@@ -70,16 +73,16 @@ public class UserEmailJpaService {
         userEmailJpaRepository.save(userEmailJpaEntity);
     }
 
-    private static UserEmailJpaEntity getUserEmailJpaEntityFromRedisEntity(
+    private UserEmailJpaEntity getUserEmailJpaEntityFromRedisEntity(
             UserEmailRedisEntity redisEntity, UserJpaEntity user
     ) {
         UserEmailJpaEntity jpaEntity = new UserEmailJpaEntity();
 
         jpaEntity.setMailProvider(redisEntity.getMailProvider());
         jpaEntity.setEmail(redisEntity.getEmail());
-        jpaEntity.setAccessToken(redisEntity.getAccessToken());
-        jpaEntity.setRefreshToken(redisEntity.getRefreshToken());
-        jpaEntity.setEndAccessTokenLife(redisEntity.getEndAccessTokenLife());
+        jpaEntity.setAccessToken(encryptionService.decryptToken(redisEntity.getAccessToken()));
+        jpaEntity.setRefreshToken(encryptionService.decryptToken(redisEntity.getRefreshToken()));
+        jpaEntity.setAccessTokenEnded(redisEntity.getAccessTokenEnded());
         jpaEntity.setLastMessageUID(redisEntity.getLastMessageUID());
         jpaEntity.setUser(user);
 
@@ -94,10 +97,6 @@ public class UserEmailJpaService {
         UserEmailJpaEntity userEmailJpaEntity = getUserEmailJpaEntity(id);
         userEmailJpaEntity.setLastMessageUID(lastMessageUID);
         userEmailJpaRepository.save(userEmailJpaEntity);
-    }
-
-    public UserEmailJpaEntity getUserEmail(Long id) {
-        return userEmailJpaRepository.getReferenceById(id);
     }
 
     public boolean existsByUserIdAndEmail(Long userId, String email) {
@@ -132,7 +131,7 @@ public class UserEmailJpaService {
         }
     }
 
-    private UserEmailJpaEntity getUserEmailJpaEntity(Long id) {
+    public UserEmailJpaEntity getUserEmailJpaEntity(Long id) {
         return userEmailJpaRepository.findById(id)
                 .orElseThrow(() -> new UserEmailJpaEntityNotFoundException("UserEmailJpaEntity is not present"));
     }
