@@ -14,7 +14,13 @@ EmailCheckerBot – это телеграм бот, который предла�
 *  <img src="https://github.com/devicons/devicon/blob/master/icons/java/java-original.svg" style="width:25px; height:25px;"/> Java
 *  <img src="https://github.com/devicons/devicon/blob/master/icons/spring/spring-original.svg" style="width:25px; height:25px;"/> Spring Boot
 *  <img src="https://github.com/devicons/devicon/blob/master/icons/postgresql/postgresql-original.svg" style="width:25px; height:25px;"/> PostgreSQL
+*  <img src="https://github.com/devicons/devicon/blob/master/icons/liquibase/liquibase-original.svg" style="width:25px; height:25px;"/> Liquibase
 *  <img src="https://github.com/devicons/devicon/blob/master/icons/redis/redis-original.svg" style="width:25px; height:25px;"/> Redis
 *  <img src="https://github.com/devicons/devicon/blob/master/icons/docker/docker-original.svg" style="width:25px; height:25px;"/> Docker
 *  <img src="https://github.com/devicons/devicon/blob/master/icons/swagger/swagger-original.svg" style="width:25px; height:25px;"/> [Swagger](http://45.10.41.141:8080/swagger-ui/index.html#/)
 
+## Документация
+### Диаграммы
+ * ER диаграмма ([pdf](https://github.com/Novia2003/EmailCheckerBot/blob/master/diagrams/ER%20Diagram.pdf))
+ * Диаграмма прецедентов ([pdf](https://github.com/Novia2003/EmailCheckerBot/blob/master/diagrams/Use%20Case%20Diagram.pdf))
+ * Диаграмма последовательности ([pdf](https://github.com/Novia2003/EmailCheckerBot/blob/master/diagrams/Sequence%20Diagram%20Notification.pdf))
