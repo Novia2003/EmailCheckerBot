@@ -1,0 +1,67 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST}
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+
+email:
+  providers:
+    yandex:
+      host: imap.yandex.com
+      port: 993
+      ssl: true
+      auth: XOAUTH2
+      auth-url: https://oauth.yandex.ru
+      client-id: ${EMAIL_PROVIDERS_YANDEX_CLIENT_ID}
+      client-secret: ${EMAIL_PROVIDERS_YANDEX_CLIENT_SECRET}
+      settings-url: https://mail.yandex.ru/#setup/client
+    mailru:
+      host: imap.mail.ru
+      port: 993
+      ssl: true
+      auth: XOAUTH2
+      auth-url: https://oauth.mail.ru
+      client-id: ${EMAIL_PROVIDERS_MAILRU_CLIENT_ID}
+      client-secret: ${EMAIL_PROVIDERS_MAILRU_CLIENT_SECRET}
+      settings-url: https://help.mail.ru/mail/security/apps/
+  check:
+    delay: PT1M
+
+fixed:
+  thread:
+    pool:
+      size: 10
+
+rest:
+  yandex:
+    user-info-url: https://login.yandex.ru
+    oauth-url: https://oauth.yandex.ru
+    read-timeout: 120s
+    connect-timeout: 120s
+  mailru:
+    url: https://oauth.mail.ru
+    read-timeout: 120s
+    connect-timeout: 120s
+
+messages:
+  url: ${MESSAGES_URL}
+
+redirect:
+  uri: ${REDIRECT_URI}
+
+encryption:
+  key: ${ENCRYPTION_KEY}
+
+telegram:
+  bot:
+    token: ${TELEGRAM_BOT_TOKEN}
+    username: Slava

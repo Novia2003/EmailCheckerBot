@@ -1,0 +1,21 @@
+services:
+  redis:
+    image: redis:7.4.1
+    restart: "no"
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: redis-cli ping
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+
+  emailcheckerbot:
+    image: emailcheckerbot:latest
+    build: .
+    restart: "no"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
